@@ -1,4 +1,9 @@
-#packageManager.py
+"""
+Description:    Various utilities used to manage package .
+Author:         kirksland
+Date Created:   Feb 21, 2024
+"""
+
 import os
 import sys
 import importlib

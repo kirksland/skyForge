@@ -1,4 +1,9 @@
-# toolKit.py
+"""
+Description:    Various utilities used modeling tool .
+Author:         kirksland
+Date Created:   Feb 21, 2024
+"""
+
 import hou 
 class toolKit:
     def __init__(self):

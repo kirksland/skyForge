@@ -10,7 +10,7 @@
             "PYTHONPATH": "$HPD/python"
         },
         {
-            "HOUDINI_VIEWER_STATE_PATH": "$HPD/viewerState"
+            "HOUDINI_VIEWERSTATE_PATH": "$HPD/viewerState"
         },
         {
             "HOUDINI_OTLSCAN_PATH": "$HPD/hda"
@@ -20,6 +20,9 @@
         },
         {
             "PACK_PATH": "$HOUDINI_USER_PREF_DIR/packages"
+        },
+        {
+            "HOUDINI_DESK_PATH": "$HPD/desktop"
         },
         {
             "SK_ICONS": "$HPD/config/icons"

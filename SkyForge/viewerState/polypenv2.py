@@ -248,7 +248,15 @@ class State(object):
         node = kwargs["node"]                
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
-                                
+        tx = node.parm("tx").eval()    
+        ty = node.parm("tx").eval()    
+        tz = node.parm("tx").eval()  
+        t = hou.Vector3(tx, ty, tz)  
+        if t == (0.0,0.0,0.0):
+            node.parm("toggleAction").set(0)
+        else:
+            node.parm("toggleAction").set(1)
+                                    
     def onStateToHandle(self, kwargs):
         """ Sets the handle parms with the node parms.
         """                       
@@ -278,7 +286,8 @@ class State(object):
             sel_str = selection.selectionStrings()[0]
             geo = node.geometry()
             old_data_str = node.parm("transform_data").eval()
-
+            
+            
             if sel_type == hou.geometryType.Primitives:
                 bbox = geo.primBoundingBox(sel_str)
                 
@@ -290,39 +299,43 @@ class State(object):
                 pointid = [point.number() for point in edgepoints]
                 point_ids_str = " ".join(map(str, pointid))
                 bbox = geo.pointBoundingBox(point_ids_str)
+
             elif sel_type == hou.geometryType.Points:
-                
                 bbox = geo.pointBoundingBox(str(sel_ids))
-
-
+                sel_points = geo.globPoints(str(sel_ids), ordered=False)
+                
+                sel_ids = [point.number() for point in sel_points]
+                
             pivot_pos = bbox.center()
 
-            node.parm("px").set(pivot_pos[0])
-            node.parm("py").set(pivot_pos[1])
-            node.parm("pz").set(pivot_pos[2])
-            node.parm("group").set(sel_str)
-            node.parm("geometryType").set(str(sel_type))
-
+                       
+            
             old_data = json.loads(old_data_str) if old_data_str else{}
             if "selections" not in old_data:
                 old_data["selections"] = []
 
             selection_data = {
                 "type": str(sel_type),  # Peut être "point", "edge" ou "face"
-                "ids": str(sel_ids),  # Liste des identifiants sélectionnés
+                "ids": {
+                sel_ids: () for sel_ids in sel_ids
+
+                },  # Liste des identifiants sélectionnés
             }
 
             old_data["selections"].append(selection_data)
 
-
-
+            
+            node.parm("px").set(pivot_pos[0])
+            node.parm("py").set(pivot_pos[1])
+            node.parm("pz").set(pivot_pos[2])
+            node.parm("group").set(sel_str)
+            node.parm("geometryType").set(str(sel_type))
             node.parm("transform_data").set(json.dumps(old_data))
-            pythonsop = node.node("python4")
-            node.parm("forceCook").set(True)
+            node.parm("toggleAction").set(0)
             self.xform_handle.show(True)
             self.xform_handle.update()
             
-
+           
         
         # Must return True to accept the selection
         return False

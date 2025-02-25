@@ -73,6 +73,7 @@ if viewer:
 
   <shelfSet name="shelf_set_4" label="New Shelf Set">
     <memberToolshelf name="SkyForgeShelf"/>
+    <memberToolshelf name="testShelf"/>
   </shelfSet>
 
   <tool name="skyForgeMenu" label="SkyForgeMenu" icon="$HPD/config/icons/menu-bar.png">
@@ -101,7 +102,7 @@ class HoudiniContextMenu(QtWidgets.QMenu):
          # Ajouter l'entÃªte "Skyforge" avec une QLabel personnalisÃ©e
         header_label = QtWidgets.QLabel("Skyforge")
         header_label.setAlignment(QtCore.Qt.AlignCenter)
-        header_label.setStyleSheet("color: #3498DB; font-size: 21px; font-weight: bold; padding: 3px; min-width: 250px;")
+        header_label.setStyleSheet("color: #3498DB; font-size: 21px; font-weight: bold; padding: 3px; min-width: 150px;")
         header_widget_action = QtWidgets.QWidgetAction(self)
         header_widget_action.setDefaultWidget(header_label)
         self.addAction(header_widget_action)
@@ -124,13 +125,13 @@ class HoudiniContextMenu(QtWidgets.QMenu):
                 border: 1px solid #555;
                 padding: 5px;
                 font-size: 15px;
-                min-width: 250px;  /* Largeur minimale */
+                min-width: 150px;  /* Largeur minimale */
 
             }
             QMenu::item {
                 padding: 8px 25px;  /* Top/bottom, left/right padding */
                 margin: 2px 0px;
-                min-width: 250px;
+                min-width: 150px;
             }
             QMenu::item:selected {
                 background-color: #505050;
