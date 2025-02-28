@@ -102,6 +102,13 @@ class State(object):
             for p in geo.globPoints(sel_str, ordered=False)
         }
 
+        elif sel_type == hou.geometryType.Primitives:
+            return {
+                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                for f in geo.globPrims(sel_str)
+                for p in f.points()
+            }
+
     def getBoundingBox(self, geo, sel_type, sel_str):
         """ Retourne la bounding box en fonction du type de sélection """
         if sel_type == hou.geometryType.Primitives:
@@ -286,12 +293,5 @@ def createViewerStateTemplate():
         primitive_types=[], 
         allow_other_sops=False, 
         hotkey=hk2)
-
-
-    
-
-
-
-
 
     return template
