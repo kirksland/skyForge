@@ -128,13 +128,9 @@ class State(object):
         """
         node = kwargs["node"]
         state_parms = kwargs["state_parms"]
-
-
         self.geometry = node.geometry()
-        
         self.gi = su.GeometryIntersector(self.geometry, self.scene_viewer)
         self.mygeo.setGeometry(self.geometry)
-        
         self.mygeo.drawable("points_n").show(True)
         self.mygeo.drawable("face_n").show(True)
         self.xform_handle.show(False)
@@ -145,83 +141,7 @@ class State(object):
         """
         state_parms = kwargs["state_parms"]
 
-    def onInterrupt(self, kwargs):
-        """ Called when the state is interrupted e.g when the mouse 
-        moves outside the viewport
-        """
-        pass
-
-    def onResume(self, kwargs):
-        """ Called when an interrupted state resumes
-        """
-        pass
-
-    def onMouseEvent(self, kwargs):
-        """ Process mouse and tablet events
-        """
-        ui_event = kwargs["ui_event"]
-        dev = ui_event.device()
-        rorigin, rdir = ui_event.ray()
-        closest_prim = -1
-        closest_point = -1
-        closest_edge_id = -1
-        
-        
-        """
-        # check if intersect --------------------------------------------------------------------------------------------------
-        intersect = self.gi.intersect(rorigin, rdir)
-        if intersect != 0:
-            nearest_point = self.geometry.nearestPoint(self.gi.position, ptgroup=None, max_radius=0.1)
-            
-            closest_edge = self.gi._closest_edge()
-            closest_prim = self.gi.prim_num
-
-            # find closest point ---------------------------------------------------------------------------
-            if nearest_point is not None:
-                dist = (self.gi.position - nearest_point.position()).length()
-                if dist < 0.01:
-                    closest_point = nearest_point.number()
-                    #print("point :", closest_point)
-                    self.mygeo.drawable("points_h").setParams({"indices":[closest_point]})
-                    self.mygeo.drawable("points_h").show(True)
-                    self.mygeo.drawable("face_h").show(False)
-                    self.point_selection = nearest_point
-                else:
-                    self.mygeo.drawable("points_h").show(False)
-
-
-            # find closest edge ----------------------------------------------------------------------------
-            if closest_edge is not None and closest_point ==- 1:
-                if self.gi._distance_to_edge(self.gi.position, closest_edge) < 0.01 :
-                    closest_edge_id = closest_edge.edgeId()
-
-                    edge_point = closest_edge.points()
-                    #self.log(edge_point[0].number())
-                    self.myedge.setGeometry(self.buildEdge(edge_point))
-                    self.myedge.drawable("line_h").show(True)
-                    self.mygeo.drawable("face_h").show(False)
-                    self.edge_selection = closest_edge
-
-            else:
-                closest_edge_id == -1      
-                self.myedge.drawable("line_h").show(False)      
-            
-            if closest_prim != -1 and closest_edge_id == -1 and closest_point == -1:
-                #print("prim :",closest_prim)
-                self.mygeo.drawable("face_h").setParams({"indices":[closest_prim]})
-                self.mygeo.drawable("face_h").show(True)
-                self.prim_selection = closest_prim
-
-
-        else:
-
-            self.mygeo.drawable("points_h").show(False)
-            self.mygeo.drawable("face_h").show(False)
-            self.myedge.drawable("line_h").show(False)
-            
-        # Must return True to consume the event
-        return False
-        """
+    
     
     def onDraw(self, kwargs):
         """ Called for rendering a state e.g. required for 
