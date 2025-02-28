@@ -119,6 +119,31 @@ class State(object):
         node.parm("sy").set(1)
         node.parm("sz").set(1)
 
+    def getSelectionIds(self, geo, sel_type, sel_str):
+        """ Retourne les identifiants des éléments sélectionnés """
+        if sel_type == hou.geometryType.Edges:
+            return {
+                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                for e in geo.globEdges(sel_str)
+                for p in e.points()
+            }
+        elif sel_type == hou.geometryType.Points:
+            return {
+            p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+            for p in geo.globPoints(sel_str, ordered=False)
+        }
+
+    def getBoundingBox(self, geo, sel_type, sel_str):
+        """ Retourne la bounding box en fonction du type de sélection """
+        if sel_type == hou.geometryType.Primitives:
+            return geo.primBoundingBox(sel_str)
+        elif sel_type == hou.geometryType.Edges:
+            edge_points = [p for e in geo.globEdges(sel_str) for p in e.points()]
+            return geo.pointBoundingBox(" ".join(str(p.number()) for p in edge_points))
+        elif sel_type == hou.geometryType.Points:
+            return geo.pointBoundingBox(sel_str)
+        return hou.BoundingBox()
+
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -165,18 +190,49 @@ class State(object):
         """ Sets the node parms with the handle parms.
         """
         parms = kwargs["parms"]
-        node = kwargs["node"]                
+        node = kwargs["node"]     
+        # Récupérer les données précédentes stockées dans le parm "transform_data"
+        old_data_str = node.parm("transform_data").eval()
+
+        # Charger les données en format JSON
+        old_data = json.loads(old_data_str or "{}")
+
+        # Vérifier s'il y a des sélections
+        if "selections" in old_data:
+            # Récupérer la dernière sélection
+            last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+
+            # Accéder à "ids" qui est un dictionnaire retourné par getSelectionIds
+            selection = last_selection["ids"]
+            for last_key, last_value in selection.items():
+                # Accéder au premier sous-tuple (position du point)
+                position = last_value[0]  # Premier sous-tuple : position du point
+                
+
+                # Accéder au deuxième sous-tuple (valeurs (0.0, 0.0, 0.0))
+                zero_values = last_value[1]  # Deuxième sous-tuple : (0.0, 0.0, 0.0)
+
+                # Modifier les valeurs de zero_values (par exemple, on change les valeurs en (1.0, 1.0, 1.0))
+                modified_zero_values = (parms["tx"], 1.0, 1.0)
+
+                # Mettre à jour la valeur dans le dictionnaire
+                selection[last_key] = (last_value[0], modified_zero_values)  # On met à jour le second sous-tuple
+
+               
+                
+
+
+
+            # Mettre à jour old_data avec les nouvelles valeurs
+            old_data["selections"][-1]["ids"] = selection
+
+            # Mettre à jour le parm transform_data avec le nouveau JSON
+            node.parm("transform_data").set(json.dumps(old_data))
+
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
-        tx = node.parm("tx").eval()    
-        ty = node.parm("tx").eval()    
-        tz = node.parm("tx").eval()  
-        t = hou.Vector3(tx, ty, tz)  
-        if t == (0.0,0.0,0.0):
-            node.parm("toggleAction").set(0)
-        else:
-            node.parm("toggleAction").set(1)
-                                    
+
+        
     def onStateToHandle(self, kwargs):
         """ Sets the handle parms with the node parms.
         """                       
@@ -189,76 +245,50 @@ class State(object):
     def onSelection(self, kwargs):
         """ Called when a selector has selected something
         """        
-        selection = kwargs["selection"]
-        node = kwargs["node"]
-        state_parms = kwargs["state_parms"]
+        selection, node, state_parms = kwargs["selection"], kwargs["node"], kwargs["state_parms"]
         geo = self.geometry
         self.initTransform(node)
-        
-        
 
-        if not selection or len(selection.selectionStrings()) == 0:
+        if not selection or not selection.selectionStrings():
+            self.xform_handle.show(False)
             return False
 
         if selection is not None:
+            geo = node.geometry()
+
             sel_type = selection.geometryType()
             sel_ids = selection
             sel_str = selection.selectionStrings()[0]
-            geo = node.geometry()
-            old_data_str = node.parm("transform_data").eval()
             
-            
-            if sel_type == hou.geometryType.Primitives:
-                bbox = geo.primBoundingBox(sel_str)
-                
-            elif sel_type == hou.geometryType.Edges:
-                edges = geo.globEdges(sel_str)  # Récupère un tuple de hou.Edge
-                edgepoints = [point for edge in edges for point in edge.points()]
-                
-                # Récupérer l'index de chaque point
-                pointid = [point.number() for point in edgepoints]
-                point_ids_str = " ".join(map(str, pointid))
-                bbox = geo.pointBoundingBox(point_ids_str)
+            old_data_str = node.parm("transform_data").eval()   
 
-            elif sel_type == hou.geometryType.Points:
-                bbox = geo.pointBoundingBox(str(sel_ids))
-                sel_points = geo.globPoints(str(sel_ids), ordered=False)
-                
-                sel_ids = [point.number() for point in sel_points]
-                
-            pivot_pos = bbox.center()
+            old_data = json.loads(node.parm("transform_data").eval() or "{}")
+            old_data.setdefault("selections", [])
 
-                       
+            selection = self.getSelectionIds(geo, sel_type, sel_str)
+            last_key, last_value = list(selection.items())[-1]  # Récupérer le dernier élément du dictionnaire (par exemple)
+            position = last_value[0]  # Accéder au premier sous-tuple (position du point)
             
-            old_data = json.loads(old_data_str) if old_data_str else{}
-            if "selections" not in old_data:
-                old_data["selections"] = []
 
             selection_data = {
-                "type": str(sel_type),  # Peut être "point", "edge" ou "face"
-                "ids": {
-                sel_ids: () for sel_ids in sel_ids
-
-                },  # Liste des identifiants sélectionnés
+            "type": str(sel_type),
+            "ids": self.getSelectionIds(geo, sel_type, sel_str),
+            "state": "selection"
             }
-
             old_data["selections"].append(selection_data)
 
-            
-            node.parm("px").set(pivot_pos[0])
-            node.parm("py").set(pivot_pos[1])
-            node.parm("pz").set(pivot_pos[2])
-            node.parm("group").set(sel_str)
-            node.parm("geometryType").set(str(sel_type))
+
             node.parm("transform_data").set(json.dumps(old_data))
-            node.parm("toggleAction").set(0)
             self.xform_handle.show(True)
             self.xform_handle.update()
+        
+            
             
            
         
         # Must return True to accept the selection
         return False
+
 
 def createViewerStateTemplate():
     """ Mandatory entry point to create and return the viewer state 
