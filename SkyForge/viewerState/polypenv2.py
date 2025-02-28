@@ -21,7 +21,7 @@ class State(object):
         self.state_name = state_name
         self.scene_viewer = scene_viewer
 
-        self.gi = None
+        
         self.geometry = None
         self.xform_handle = hou.Handle(self.scene_viewer, "Transform")
         self.transform_data = None
@@ -44,19 +44,6 @@ class State(object):
             "pivot_ry",
             "pivot_rz" ]
 
-        # Geometry drawable
-        self.mygeo = hou.GeometryDrawableGroup("drawableGeo")
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_h", params={"color1":COLOR_H, "radius":SIZE7, "style":hou.drawableGeometryPointStyle.LinearCircle}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_s", params={"color1":COLOR_S}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_n", params={"color1":COLOR_S, "highlight_mode":hou.drawableHighlightMode.Transparent}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_h", params={"color1":COLOR_H}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_s", params={"color1":COLOR_S}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_n", params={"color1":COLOR_S, "highlight_mode":hou.drawableHighlightMode.Transparent}))
-
-
-        self.myedge = hou.GeometryDrawableGroup("drawableEdge")
-        self.myedge.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Line, "line_h", params={"color1":COLOR_H, "line_width":SIZE2}))
-
         # support for rendering drawable
         self.prev_prim_num = -1
         self.prim_selection = None
@@ -65,25 +52,7 @@ class State(object):
 
         self.selectionMode = None
 
-    def buildEdge(self,edge):
-        """ 
-        Create line primitive
-        """
-        lineDrawable = hou.Geometry()
 
-        P1 = lineDrawable.createPoint()
-        P2 = lineDrawable.createPoint()
-        
-        # Set positions for points
-        P1.setPosition(edge[0].position())
-        P2.setPosition(edge[1].position())
-        
-        # Create a line primitive
-        line = lineDrawable.createPolygon()
-        line.addVertex(P1)
-        line.addVertex(P2)
-        
-        return lineDrawable
 
     def alignVector(v1, v2):
         """ Aligns v1 to v2 and returns the resulting vector.
@@ -154,27 +123,12 @@ class State(object):
         node = kwargs["node"]
         state_parms = kwargs["state_parms"]
         self.geometry = node.geometry()
-        self.gi = su.GeometryIntersector(self.geometry, self.scene_viewer)
-        self.mygeo.setGeometry(self.geometry)
-        self.mygeo.drawable("points_n").show(True)
-        self.mygeo.drawable("face_n").show(True)
         self.xform_handle.show(False)
-
 
     def onExit(self,kwargs):
         """ Called when the state terminates
         """
         state_parms = kwargs["state_parms"]
-
-    
-    
-    def onDraw(self, kwargs):
-        """ Called for rendering a state e.g. required for 
-        hou.AdvancedDrawable objects
-        """
-        draw_handle = kwargs["draw_handle"]
-        self.mygeo.draw(draw_handle)
-        self.myedge.draw(draw_handle)
 
     def onBeginHandleToState(self, kwargs):
         """ Open an undo bracket for the handle operations.
@@ -206,22 +160,16 @@ class State(object):
             selection = last_selection["ids"]
             for last_key, last_value in selection.items():
                 # Accéder au premier sous-tuple (position du point)
-                position = last_value[0]  # Premier sous-tuple : position du point
-                
+                position = last_value[0]  # Premier sous-tuple : position du point    
 
                 # Accéder au deuxième sous-tuple (valeurs (0.0, 0.0, 0.0))
                 zero_values = last_value[1]  # Deuxième sous-tuple : (0.0, 0.0, 0.0)
 
                 # Modifier les valeurs de zero_values (par exemple, on change les valeurs en (1.0, 1.0, 1.0))
-                modified_zero_values = (parms["tx"], 1.0, 1.0)
+                modified_zero_values = (parms["tx"], parms["ty"], parms["tz"])
 
                 # Mettre à jour la valeur dans le dictionnaire
                 selection[last_key] = (last_value[0], modified_zero_values)  # On met à jour le second sous-tuple
-
-               
-                
-
-
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
@@ -276,9 +224,13 @@ class State(object):
             "state": "selection"
             }
             old_data["selections"].append(selection_data)
-
-
             node.parm("transform_data").set(json.dumps(old_data))
+
+            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            # Mettre à jour les paramètres du nœud
+            node.parm("px").set(bbox.center()[0])
+            node.parm("py").set(bbox.center()[1])
+            node.parm("pz").set(bbox.center()[2])
             self.xform_handle.show(True)
             self.xform_handle.update()
         
