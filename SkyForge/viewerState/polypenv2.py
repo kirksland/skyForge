@@ -21,7 +21,7 @@ class State(object):
         self.state_name = state_name
         self.scene_viewer = scene_viewer
 
-        self.gi = None
+        
         self.geometry = None
         self.xform_handle = hou.Handle(self.scene_viewer, "Transform")
         self.transform_data = None
@@ -44,19 +44,6 @@ class State(object):
             "pivot_ry",
             "pivot_rz" ]
 
-        # Geometry drawable
-        self.mygeo = hou.GeometryDrawableGroup("drawableGeo")
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_h", params={"color1":COLOR_H, "radius":SIZE7, "style":hou.drawableGeometryPointStyle.LinearCircle}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_s", params={"color1":COLOR_S}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Point, "points_n", params={"color1":COLOR_S, "highlight_mode":hou.drawableHighlightMode.Transparent}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_h", params={"color1":COLOR_H}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_s", params={"color1":COLOR_S}))
-        self.mygeo.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Face, "face_n", params={"color1":COLOR_S, "highlight_mode":hou.drawableHighlightMode.Transparent}))
-
-
-        self.myedge = hou.GeometryDrawableGroup("drawableEdge")
-        self.myedge.addDrawable(hou.GeometryDrawable(self.scene_viewer, hou.drawableGeometryType.Line, "line_h", params={"color1":COLOR_H, "line_width":SIZE2}))
-
         # support for rendering drawable
         self.prev_prim_num = -1
         self.prim_selection = None
@@ -65,25 +52,7 @@ class State(object):
 
         self.selectionMode = None
 
-    def buildEdge(self,edge):
-        """ 
-        Create line primitive
-        """
-        lineDrawable = hou.Geometry()
 
-        P1 = lineDrawable.createPoint()
-        P2 = lineDrawable.createPoint()
-        
-        # Set positions for points
-        P1.setPosition(edge[0].position())
-        P2.setPosition(edge[1].position())
-        
-        # Create a line primitive
-        line = lineDrawable.createPolygon()
-        line.addVertex(P1)
-        line.addVertex(P2)
-        
-        return lineDrawable
 
     def alignVector(v1, v2):
         """ Aligns v1 to v2 and returns the resulting vector.
@@ -119,6 +88,38 @@ class State(object):
         node.parm("sy").set(1)
         node.parm("sz").set(1)
 
+    def getSelectionIds(self, geo, sel_type, sel_str):
+        """ Retourne les identifiants des éléments sélectionnés """
+        if sel_type == hou.geometryType.Edges:
+            return {
+                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                for e in geo.globEdges(sel_str)
+                for p in e.points()
+            }
+        elif sel_type == hou.geometryType.Points:
+            return {
+            p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+            for p in geo.globPoints(sel_str, ordered=False)
+        }
+
+        elif sel_type == hou.geometryType.Primitives:
+            return {
+                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                for f in geo.globPrims(sel_str)
+                for p in f.points()
+            }
+
+    def getBoundingBox(self, geo, sel_type, sel_str):
+        """ Retourne la bounding box en fonction du type de sélection """
+        if sel_type == hou.geometryType.Primitives:
+            return geo.primBoundingBox(sel_str)
+        elif sel_type == hou.geometryType.Edges:
+            edge_points = [p for e in geo.globEdges(sel_str) for p in e.points()]
+            return geo.pointBoundingBox(" ".join(str(p.number()) for p in edge_points))
+        elif sel_type == hou.geometryType.Points:
+            return geo.pointBoundingBox(sel_str)
+        return hou.BoundingBox()
+
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -128,108 +129,13 @@ class State(object):
         """
         node = kwargs["node"]
         state_parms = kwargs["state_parms"]
-
-
         self.geometry = node.geometry()
-        
-        self.gi = su.GeometryIntersector(self.geometry, self.scene_viewer)
-        self.mygeo.setGeometry(self.geometry)
-        
-        self.mygeo.drawable("points_n").show(True)
-        self.mygeo.drawable("face_n").show(True)
         self.xform_handle.show(False)
-
 
     def onExit(self,kwargs):
         """ Called when the state terminates
         """
         state_parms = kwargs["state_parms"]
-
-    def onInterrupt(self, kwargs):
-        """ Called when the state is interrupted e.g when the mouse 
-        moves outside the viewport
-        """
-        pass
-
-    def onResume(self, kwargs):
-        """ Called when an interrupted state resumes
-        """
-        pass
-
-    def onMouseEvent(self, kwargs):
-        """ Process mouse and tablet events
-        """
-        ui_event = kwargs["ui_event"]
-        dev = ui_event.device()
-        rorigin, rdir = ui_event.ray()
-        closest_prim = -1
-        closest_point = -1
-        closest_edge_id = -1
-        
-        
-        """
-        # check if intersect --------------------------------------------------------------------------------------------------
-        intersect = self.gi.intersect(rorigin, rdir)
-        if intersect != 0:
-            nearest_point = self.geometry.nearestPoint(self.gi.position, ptgroup=None, max_radius=0.1)
-            
-            closest_edge = self.gi._closest_edge()
-            closest_prim = self.gi.prim_num
-
-            # find closest point ---------------------------------------------------------------------------
-            if nearest_point is not None:
-                dist = (self.gi.position - nearest_point.position()).length()
-                if dist < 0.01:
-                    closest_point = nearest_point.number()
-                    #print("point :", closest_point)
-                    self.mygeo.drawable("points_h").setParams({"indices":[closest_point]})
-                    self.mygeo.drawable("points_h").show(True)
-                    self.mygeo.drawable("face_h").show(False)
-                    self.point_selection = nearest_point
-                else:
-                    self.mygeo.drawable("points_h").show(False)
-
-
-            # find closest edge ----------------------------------------------------------------------------
-            if closest_edge is not None and closest_point ==- 1:
-                if self.gi._distance_to_edge(self.gi.position, closest_edge) < 0.01 :
-                    closest_edge_id = closest_edge.edgeId()
-
-                    edge_point = closest_edge.points()
-                    #self.log(edge_point[0].number())
-                    self.myedge.setGeometry(self.buildEdge(edge_point))
-                    self.myedge.drawable("line_h").show(True)
-                    self.mygeo.drawable("face_h").show(False)
-                    self.edge_selection = closest_edge
-
-            else:
-                closest_edge_id == -1      
-                self.myedge.drawable("line_h").show(False)      
-            
-            if closest_prim != -1 and closest_edge_id == -1 and closest_point == -1:
-                #print("prim :",closest_prim)
-                self.mygeo.drawable("face_h").setParams({"indices":[closest_prim]})
-                self.mygeo.drawable("face_h").show(True)
-                self.prim_selection = closest_prim
-
-
-        else:
-
-            self.mygeo.drawable("points_h").show(False)
-            self.mygeo.drawable("face_h").show(False)
-            self.myedge.drawable("line_h").show(False)
-            
-        # Must return True to consume the event
-        return False
-        """
-    
-    def onDraw(self, kwargs):
-        """ Called for rendering a state e.g. required for 
-        hou.AdvancedDrawable objects
-        """
-        draw_handle = kwargs["draw_handle"]
-        self.mygeo.draw(draw_handle)
-        self.myedge.draw(draw_handle)
 
     def onBeginHandleToState(self, kwargs):
         """ Open an undo bracket for the handle operations.
@@ -245,18 +151,43 @@ class State(object):
         """ Sets the node parms with the handle parms.
         """
         parms = kwargs["parms"]
-        node = kwargs["node"]                
+        node = kwargs["node"]     
+        # Récupérer les données précédentes stockées dans le parm "transform_data"
+        old_data_str = node.parm("transform_data").eval()
+
+        # Charger les données en format JSON
+        old_data = json.loads(old_data_str or "{}")
+
+        # Vérifier s'il y a des sélections
+        if "selections" in old_data:
+            # Récupérer la dernière sélection
+            last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+
+            # Accéder à "ids" qui est un dictionnaire retourné par getSelectionIds
+            selection = last_selection["ids"]
+            for last_key, last_value in selection.items():
+                # Accéder au premier sous-tuple (position du point)
+                position = last_value[0]  # Premier sous-tuple : position du point    
+
+                # Accéder au deuxième sous-tuple (valeurs (0.0, 0.0, 0.0))
+                zero_values = last_value[1]  # Deuxième sous-tuple : (0.0, 0.0, 0.0)
+
+                # Modifier les valeurs de zero_values (par exemple, on change les valeurs en (1.0, 1.0, 1.0))
+                modified_zero_values = (parms["tx"], parms["ty"], parms["tz"])
+
+                # Mettre à jour la valeur dans le dictionnaire
+                selection[last_key] = (last_value[0], modified_zero_values)  # On met à jour le second sous-tuple
+
+            # Mettre à jour old_data avec les nouvelles valeurs
+            old_data["selections"][-1]["ids"] = selection
+
+            # Mettre à jour le parm transform_data avec le nouveau JSON
+            node.parm("transform_data").set(json.dumps(old_data))
+
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
-        tx = node.parm("tx").eval()    
-        ty = node.parm("tx").eval()    
-        tz = node.parm("tx").eval()  
-        t = hou.Vector3(tx, ty, tz)  
-        if t == (0.0,0.0,0.0):
-            node.parm("toggleAction").set(0)
-        else:
-            node.parm("toggleAction").set(1)
-                                    
+
+        
     def onStateToHandle(self, kwargs):
         """ Sets the handle parms with the node parms.
         """                       
@@ -269,76 +200,54 @@ class State(object):
     def onSelection(self, kwargs):
         """ Called when a selector has selected something
         """        
-        selection = kwargs["selection"]
-        node = kwargs["node"]
-        state_parms = kwargs["state_parms"]
+        selection, node, state_parms = kwargs["selection"], kwargs["node"], kwargs["state_parms"]
         geo = self.geometry
         self.initTransform(node)
-        
-        
 
-        if not selection or len(selection.selectionStrings()) == 0:
+        if not selection or not selection.selectionStrings():
+            self.xform_handle.show(False)
             return False
 
         if selection is not None:
+            geo = node.geometry()
+
             sel_type = selection.geometryType()
             sel_ids = selection
             sel_str = selection.selectionStrings()[0]
-            geo = node.geometry()
-            old_data_str = node.parm("transform_data").eval()
             
-            
-            if sel_type == hou.geometryType.Primitives:
-                bbox = geo.primBoundingBox(sel_str)
-                
-            elif sel_type == hou.geometryType.Edges:
-                edges = geo.globEdges(sel_str)  # Récupère un tuple de hou.Edge
-                edgepoints = [point for edge in edges for point in edge.points()]
-                
-                # Récupérer l'index de chaque point
-                pointid = [point.number() for point in edgepoints]
-                point_ids_str = " ".join(map(str, pointid))
-                bbox = geo.pointBoundingBox(point_ids_str)
+            old_data_str = node.parm("transform_data").eval()   
 
-            elif sel_type == hou.geometryType.Points:
-                bbox = geo.pointBoundingBox(str(sel_ids))
-                sel_points = geo.globPoints(str(sel_ids), ordered=False)
-                
-                sel_ids = [point.number() for point in sel_points]
-                
-            pivot_pos = bbox.center()
+            old_data = json.loads(node.parm("transform_data").eval() or "{}")
+            old_data.setdefault("selections", [])
 
-                       
+            selection = self.getSelectionIds(geo, sel_type, sel_str)
+            last_key, last_value = list(selection.items())[-1]  # Récupérer le dernier élément du dictionnaire (par exemple)
+            position = last_value[0]  # Accéder au premier sous-tuple (position du point)
             
-            old_data = json.loads(old_data_str) if old_data_str else{}
-            if "selections" not in old_data:
-                old_data["selections"] = []
 
             selection_data = {
-                "type": str(sel_type),  # Peut être "point", "edge" ou "face"
-                "ids": {
-                sel_ids: () for sel_ids in sel_ids
-
-                },  # Liste des identifiants sélectionnés
+            "type": str(sel_type),
+            "ids": self.getSelectionIds(geo, sel_type, sel_str),
+            "state": "selection"
             }
-
             old_data["selections"].append(selection_data)
-
-            
-            node.parm("px").set(pivot_pos[0])
-            node.parm("py").set(pivot_pos[1])
-            node.parm("pz").set(pivot_pos[2])
-            node.parm("group").set(sel_str)
-            node.parm("geometryType").set(str(sel_type))
             node.parm("transform_data").set(json.dumps(old_data))
-            node.parm("toggleAction").set(0)
+
+            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            # Mettre à jour les paramètres du nœud
+            node.parm("px").set(bbox.center()[0])
+            node.parm("py").set(bbox.center()[1])
+            node.parm("pz").set(bbox.center()[2])
             self.xform_handle.show(True)
             self.xform_handle.update()
+        
+            
             
            
         
         # Must return True to accept the selection
         return False
+
 
 def createViewerStateTemplate():
     """ Mandatory entry point to create and return the viewer state 
@@ -384,12 +293,5 @@ def createViewerStateTemplate():
         primitive_types=[], 
         allow_other_sops=False, 
         hotkey=hk2)
-
-
-    
-
-
-
-
 
     return template
