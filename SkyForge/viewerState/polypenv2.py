@@ -92,7 +92,7 @@ class State(object):
         """ Retourne les identifiants des éléments sélectionnés """
         if sel_type == hou.geometryType.Edges:
             return {
-                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0),(0.0, 0.0, 0.0))
                 for e in geo.globEdges(sel_str)
                 for p in e.points()
             }
@@ -120,6 +120,17 @@ class State(object):
             return geo.pointBoundingBox(sel_str)
         return hou.BoundingBox()
 
+    def build_transformation_matrix(self, parms):
+        """Construit la matrice de transformation complète."""
+        t = hou.Vector3(*[parms[f"t{x}"] for x in "xyz"])  # Translation
+        r = hou.Vector3(*[parms[f"r{x}"] for x in "xyz"])  # Rotation
+        s = hou.Vector3(*[parms[f"s{x}"] for x in "xyz"])  # Scale
+
+        translation = hou.hmath.buildTranslate(t)
+        rotation = hou.hmath.buildRotate(r)
+        scale = hou.hmath.buildScale(s)
+
+        return translation * rotation * scale
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -131,7 +142,7 @@ class State(object):
         state_parms = kwargs["state_parms"]
         self.geometry = node.geometry()
         self.xform_handle.show(False)
-        print(dir(self.xform_handle))
+
 
     def onExit(self,kwargs):
         """ Called when the state terminates
@@ -152,11 +163,14 @@ class State(object):
         """ Sets the node parms with the handle parms.
         """
         parms = kwargs["parms"]
-        node = kwargs["node"]     
+        node = kwargs["node"]  
+
+        final_matrix = self.build_transformation_matrix(parms)
+        pivot = hou.Vector3(*[parms[f"p{x}"] for x in "xyz"])
+        
+        
         # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data_str = node.parm("transform_data").eval()
-
-        # Charger les données en format JSON
         old_data = json.loads(old_data_str or "{}")
 
         # Vérifier s'il y a des sélections
@@ -170,10 +184,7 @@ class State(object):
                 # Accéder au premier sous-tuple (position du point)
                 position = last_value[0]  # Premier sous-tuple : position du point    
 
-                # Accéder au deuxième sous-tuple (valeurs (0.0, 0.0, 0.0))
-                zero_values = last_value[1]  # Deuxième sous-tuple : (0.0, 0.0, 0.0)
-
-                # Modifier les valeurs de zero_values (par exemple, on change les valeurs en (1.0, 1.0, 1.0))
+                # Modifier les valeurs de zero_values
                 modified_zero_values = (parms["tx"], parms["ty"], parms["tz"])
 
                 # Mettre à jour la valeur dans le dictionnaire

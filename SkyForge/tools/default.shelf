@@ -115,6 +115,7 @@ class HoudiniContextMenu(QtWidgets.QMenu):
         self.addAction("ð Reload python  ", self.reloadPackage)
         self.addAction("ð Scan Tools  ", self.scanShelfTool)
         self.addAction("ð Clear console  ", self.clearConsole)
+        self.addAction("ð Background  ", self.backgroundColor)
         
 
          # Personnalisation du style
@@ -169,6 +170,12 @@ class HoudiniContextMenu(QtWidgets.QMenu):
     def clearConsole(self):
         print('\n'*500)
         print("console cleared")
+        
+    def backgroundColor(self):
+        viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
+        if viewer:
+            settings = viewer.curViewport().settings()
+            settings.setColorScheme(hou.viewportColorScheme.Dark)
         
             
 # Fonction pour appeler le menu

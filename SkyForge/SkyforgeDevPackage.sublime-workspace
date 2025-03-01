@@ -1,0 +1,463 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"idso",
+				"idsOrigList"
+			],
+			[
+				"sel",
+				"sel_ids"
+			],
+			[
+				"is",
+				"isInit"
+			],
+			[
+				"res",
+				"isreset"
+			],
+			[
+				"tu",
+				"tuple_length"
+			],
+			[
+				"sel_",
+				"sel_points"
+			],
+			[
+				"geom",
+				"geometryType"
+			],
+			[
+				"shelf",
+				"shelf_filename"
+			],
+			[
+				"pa",
+				"packageManager"
+			],
+			[
+				"packa",
+				"package_dir"
+			],
+			[
+				"module",
+				"module_name"
+			],
+			[
+				"impo",
+				"importlib"
+			],
+			[
+				"tran",
+				"transform_dir"
+			],
+			[
+				"tras",
+				"transform_dir"
+			],
+			[
+				"transform",
+				"transform_dir"
+			],
+			[
+				"group",
+				"group_pattern"
+			],
+			[
+				"old",
+				"old_data_str"
+			],
+			[
+				"Geom",
+				"geometryType"
+			],
+			[
+				"_",
+				"_handle_hover"
+			],
+			[
+				"start",
+				"start_maxDist_val"
+			],
+			[
+				"max",
+				"max_dist_parm"
+			],
+			[
+				"find",
+				"findNodes"
+			],
+			[
+				"Apex",
+				"ApexGraphHandle"
+			],
+			[
+				"apex",
+				"apexscript"
+			],
+			[
+				"impor",
+				"__import__"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "viewerState/polypenv2.py",
+			"settings":
+			{
+				"buffer_size": 10698,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			},
+			"undo_stack":
+			[
+			]
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"lsp enable",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"lsp ",
+				"LSP: Troubleshoot Server"
+			],
+			[
+				"package",
+				"Package Control: Enable Package"
+			],
+			[
+				"package insta",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 130.0,
+		"history":
+		[
+			"print(sys.executable)",
+			"import sys"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/viewerState"
+	],
+	"file_history":
+	[
+		"/C/Users/justi/AppData/Local/Temp/22_python1_python.py",
+		"/C/Users/justi/AppData/Local/Temp/21_python1_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/viewerState/polypenv2.py",
+		"/C/Users/justi/AppData/Local/Temp/18_sop_edit_python.py",
+		"/C/Users/justi/AppData/Local/Temp/17_sop_edit_python.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/python3.11libs/soptoolutils.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/toolbar/SopStateTools.shelf",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/toolbar/SopTools.shelf",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/toolbar/ObjectTools.shelf",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/toolbar/ModelingOutputShelf.shelf",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/toolbar/ModelingToolsShelf.shelf",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/python3.11libs/edit/base.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/houdini/python3.11libs/edit/common.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForgePackage.json",
+		"/C/Users/justi/AppData/Local/Temp/__shelf_tool_qtTest.py",
+		"/C/Users/justi/AppData/Local/Temp/__shelf_tool_skyForgeMenu.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/python/sForge/customUI.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/packages/viewer_state_demo/python3.11libs/viewerstate_demo/utils.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/python/sForge/toolKit.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/python/sForge/packageManager.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/tools/default.shelf",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/toolbar/shelf_tool_assets.json",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/User/Preferences.sublime-settings",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/User/LSP.sublime-settings",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/LSP/LSP.sublime-settings",
+		"/C/Users/justi/OneDrive/Bureau/test.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/python/devTool.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/python/sForge/__init__.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/toolbar/default.shelf",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/houdini_setup.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/scripts/python/startup/starttest.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/package.json",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/package.json",
+		"/C/Users/justi/AppData/Local/Temp/36_python5_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/polypenv2.py",
+		"/C/Users/justi/AppData/Local/Temp/47_python4_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/skyforge_sceneViewer/SkyForgeMenu.py",
+		"/C/Users/justi/AppData/Local/Temp/86_python4_python.py",
+		"/C/Users/justi/AppData/Local/Temp/26_python3_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/skyforge_sceneViewer/QuickSubdivideShelfTool.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/skyforge_sceneViewer/ReloadStateShelfTools.py",
+		"/C/Users/justi/AppData/Local/Temp/29_python3_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/skyforge_sceneViewer/mypolypen.py",
+		"/C/Users/justi/AppData/Local/Temp/29_python1_python.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/viewer_states/mypolypen.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/Myscript/GeoDeformer.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/Myscript/Drawable_selector.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/Myscript/advancedDrawable.py",
+		"/C/Users/justi/OneDrive/Documents/GitHub/SkyfForge/viewer_states/sopviewerstatetest.py",
+		"/C/Users/justi/AppData/Local/Temp/f5aaca75c30db33ce15fadbcf69b0f2ab0221448_Polypen1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/e377c3fcb44afaf4f7049fdf1838f1b50b8261c9_Polypen1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/fda6596d5bdb36fbc7e7c953602217ba81133337_Polypen_copy1_extraSection_ViewerStateModule.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/packages/viewer_state_demo/viewer_states/drawable_selector_sop.py",
+		"/C/Program Files/Side Effects Software/Houdini 20.5.278/packages/viewer_state_demo/viewer_states/drawable_selector_modifier_sop.py",
+		"/C/Users/justi/AppData/Local/Temp/2c87859b1d2c8ddd318cc2c3afb0ecf1492c616a_DrawPoly1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/__shelf_tool_Subdivide_Ju.py",
+		"/C/Users/justi/OneDrive/Documents/houdini20.5/MyPython/QuickSubdivide.py",
+		"/C/Users/justi/AppData/Local/Temp/c07aa74c8d0da16d500e112de7c6e6b7135e5b7f_PolyPen1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/a8ff5e6c81459712cd172450f419ec52fdec0071_scrub1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/e62252d7c77c1b52b67c1d5a9fc4048be5b6d5da_DrawPoly1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/b5af55097395a66dc655ff6a8707512a20544edf_add_point_demo_extraSection_ViewerStateName.orig.py",
+		"/C/Users/justi/AppData/Local/Temp/8cdbafe9e79f9e32df5385e4fb14d52bcfd05cd1_drawpoly_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/eac209b6a22b481621a997da856089ba1ce292af_bend1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/f3625077278b3815e8964ec5c7f54ea13cb6034e_test_selecting1_extraSection_ViewerStateModule.py",
+		"/C/Users/justi/AppData/Local/Temp/__python_source_editor.py",
+		"/C/Users/justi/AppData/Local/Temp/14291_attribwrangle9_snippet.vfl",
+		"/C/Users/justi/AppData/Local/Temp/65437_script1_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/15355_attribwrangle2_snippet.vfl",
+		"/C/Users/justi/AppData/Local/Temp/2762_attribwrangle13_snippet.vfl",
+		"/C/Users/justi/AppData/Local/Temp/1273_attribwrangle3_snippet.vfl",
+		"/C/Program Files (x86)/Steam/steamapps/common/Scrap Mechanic/Survival/Scripts/game/SurvivalGame.lua",
+		"/C/Users/justi/AppData/Local/Temp/8859_rigscriptcomponent1_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/417_crawl_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/551_terrain_adapt_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/3853_script1_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/3724_script2_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/3199_autorigcomponent8_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/3343_script2_snippet.py",
+		"/C/Users/justi/AppData/Local/Temp/2318_attribwrangle2_snippet.vfl",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/LSP-pyright/LSP-pyright.sublime-settings",
+		"/C/Users/justi/AppData/Roaming/Sublime Text/Packages/User/LSP-pyright.sublime-settings"
+	],
+	"find":
+	{
+		"height": 27.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"print",
+			"self.gi",
+			"print",
+			"edit",
+			"node.parm(\"forceCook\")",
+			"template",
+			"icon"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "viewerState/polypenv2.py",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10698,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								283,
+								283
+							]
+						],
+						"settings":
+						{
+							"auto_complete_triggers":
+							[
+								{
+									"characters": ".",
+									"selector": "source.python"
+								},
+								{
+									"characters": ".[\"'",
+									"selector": "source - comment",
+									"server": "LSP-pyright"
+								}
+							],
+							"lsp_active": true,
+							"lsp_uri": "file:///C:/Users/justi/OneDrive/Documents/houdini20.5/packages/SkyForge/viewerState/polypenv2.py",
+							"show_definitions": false,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.LSP Log Panel":
+	{
+		"height": 0.0
+	},
+	"output.diagnostics":
+	{
+		"height": 0.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.mdpopups":
+	{
+		"height": 0.0
+	},
+	"output.mdpopups-dummy":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "SkyforgeDevPackage.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+		"lsp_show_inlay_hints": false
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 218.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
