@@ -92,19 +92,19 @@ class State(object):
         """ Retourne les identifiants des éléments sélectionnés """
         if sel_type == hou.geometryType.Edges:
             return {
-                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
                 for e in geo.globEdges(sel_str)
                 for p in e.points()
             }
         elif sel_type == hou.geometryType.Points:
             return {
-            p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
             for p in geo.globPoints(sel_str, ordered=False)
         }
 
         elif sel_type == hou.geometryType.Primitives:
             return {
-                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
                 for f in geo.globPrims(sel_str)
                 for p in f.points()
             }
@@ -120,6 +120,15 @@ class State(object):
             return geo.pointBoundingBox(sel_str)
         return hou.BoundingBox()
 
+    def build_transformation_matrix(self, parms):
+        """Construit la matrice de transformation complète."""
+        t = (parms["tx"], parms["ty"], parms["tz"])  # Translation
+        r = (parms["rx"], parms["ry"], parms["rz"])  # Rotation
+        s = (parms["sx"], parms["sy"], parms["sz"])  # Scale
+
+        matrix_list = (t, r, s)
+
+        return matrix_list
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -131,6 +140,7 @@ class State(object):
         state_parms = kwargs["state_parms"]
         self.geometry = node.geometry()
         self.xform_handle.show(False)
+
 
     def onExit(self,kwargs):
         """ Called when the state terminates
@@ -151,11 +161,15 @@ class State(object):
         """ Sets the node parms with the handle parms.
         """
         parms = kwargs["parms"]
-        node = kwargs["node"]     
+        node = kwargs["node"]  
+
+        final_matrix = self.build_transformation_matrix(parms)
+        pivot = hou.Vector3(parms["tx"], parms["ty"], parms["tz"]) + hou.Vector3(final_matrix[0])
+        tpivot = (pivot[0], pivot[1], pivot[2])
+        
+        
         # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data_str = node.parm("transform_data").eval()
-
-        # Charger les données en format JSON
         old_data = json.loads(old_data_str or "{}")
 
         # Vérifier s'il y a des sélections
@@ -169,14 +183,9 @@ class State(object):
                 # Accéder au premier sous-tuple (position du point)
                 position = last_value[0]  # Premier sous-tuple : position du point    
 
-                # Accéder au deuxième sous-tuple (valeurs (0.0, 0.0, 0.0))
-                zero_values = last_value[1]  # Deuxième sous-tuple : (0.0, 0.0, 0.0)
-
-                # Modifier les valeurs de zero_values (par exemple, on change les valeurs en (1.0, 1.0, 1.0))
-                modified_zero_values = (parms["tx"], parms["ty"], parms["tz"])
 
                 # Mettre à jour la valeur dans le dictionnaire
-                selection[last_key] = (last_value[0], modified_zero_values)  # On met à jour le second sous-tuple
+                selection[last_key] = (last_value[0], final_matrix, tpivot)  # On met à jour le second sous-tuple
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
