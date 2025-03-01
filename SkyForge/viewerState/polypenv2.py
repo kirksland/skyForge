@@ -131,7 +131,7 @@ class State(object):
         state_parms = kwargs["state_parms"]
         self.geometry = node.geometry()
         self.xform_handle.show(False)
-        print(self.xform_handle.worldTransform())
+        print(dir(self.xform_handle))
 
     def onExit(self,kwargs):
         """ Called when the state terminates
