@@ -92,19 +92,19 @@ class State(object):
         """ Retourne les identifiants des éléments sélectionnés """
         if sel_type == hou.geometryType.Edges:
             return {
-                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0),(0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
                 for e in geo.globEdges(sel_str)
                 for p in e.points()
             }
         elif sel_type == hou.geometryType.Points:
             return {
-            p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
             for p in geo.globPoints(sel_str, ordered=False)
         }
 
         elif sel_type == hou.geometryType.Primitives:
             return {
-                p.number(): (tuple(p.position()), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
                 for f in geo.globPrims(sel_str)
                 for p in f.points()
             }
@@ -122,15 +122,13 @@ class State(object):
 
     def build_transformation_matrix(self, parms):
         """Construit la matrice de transformation complète."""
-        t = hou.Vector3(*[parms[f"t{x}"] for x in "xyz"])  # Translation
-        r = hou.Vector3(*[parms[f"r{x}"] for x in "xyz"])  # Rotation
-        s = hou.Vector3(*[parms[f"s{x}"] for x in "xyz"])  # Scale
+        t = (parms["tx"], parms["ty"], parms["tz"])  # Translation
+        r = (parms["rx"], parms["ry"], parms["rz"])  # Rotation
+        s = (parms["sx"], parms["sy"], parms["sz"])  # Scale
 
-        translation = hou.hmath.buildTranslate(t)
-        rotation = hou.hmath.buildRotate(r)
-        scale = hou.hmath.buildScale(s)
+        matrix_list = (t, r, s)
 
-        return translation * rotation * scale
+        return matrix_list
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -166,7 +164,8 @@ class State(object):
         node = kwargs["node"]  
 
         final_matrix = self.build_transformation_matrix(parms)
-        pivot = hou.Vector3(*[parms[f"p{x}"] for x in "xyz"])
+        pivot = hou.Vector3(parms["tx"], parms["ty"], parms["tz"]) + hou.Vector3(final_matrix[0])
+        tpivot = (pivot[0], pivot[1], pivot[2])
         
         
         # Récupérer les données précédentes stockées dans le parm "transform_data"
@@ -184,11 +183,9 @@ class State(object):
                 # Accéder au premier sous-tuple (position du point)
                 position = last_value[0]  # Premier sous-tuple : position du point    
 
-                # Modifier les valeurs de zero_values
-                modified_zero_values = (parms["tx"], parms["ty"], parms["tz"])
 
                 # Mettre à jour la valeur dans le dictionnaire
-                selection[last_key] = (last_value[0], modified_zero_values)  # On met à jour le second sous-tuple
+                selection[last_key] = (last_value[0], final_matrix, tpivot)  # On met à jour le second sous-tuple
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
