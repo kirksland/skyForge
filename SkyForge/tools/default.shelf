@@ -171,12 +171,21 @@ class HoudiniContextMenu(QtWidgets.QMenu):
         print('\n'*500)
         print("console cleared")
         
-    def backgroundColor(self):
+    def backgroundColor(self):        
         viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
         if viewer:
             settings = viewer.curViewport().settings()
-            settings.setColorScheme(hou.viewportColorScheme.Dark)
-        
+            scheme = settings.colorScheme()
+            
+            # Utiliser directement les objets d'Ã©numÃ©ration comme clÃ©s
+            color_schemes = {
+                hou.viewportColorScheme.Dark: lambda: settings.setColorScheme(hou.viewportColorScheme.Grey),
+                hou.viewportColorScheme.Grey: lambda: settings.setColorScheme(hou.viewportColorScheme.Dark)
+            }
+            
+            # VÃ©rifier si le schÃ©ma actuel est dans notre dictionnaire
+            if scheme in color_schemes:
+                color_schemes[scheme]()  # Utiliser l'objet d'Ã©numÃ©ration directement comme clÃ©
             
 # Fonction pour appeler le menu
 def show_custom_menu():
