@@ -155,8 +155,36 @@ class State(object):
     def onEndHandleToState(self, kwargs):
         """ Close the handle undo bracket.
         """
+        node = kwargs["node"]  
+        t = node.parmTuple("t").eval()
+        p = node.parmTuple("p").eval()
+        newp = hou.Vector3(t) + hou.Vector3(p)
+
+
+        # Récupérer les données précédentes stockées dans le parm "transform_data"
+        old_data_str = node.parm("transform_data").eval()
+        old_data = json.loads(old_data_str or "{}")
+
+        # Vérifier s'il y a des sélections
+        if "selections" in old_data:
+            # Récupérer la dernière sélection
+            last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+
+            # Accéder à "ids" qui est un dictionnaire retourné par getSelectionIds
+            selection = last_selection["ids"]
+            for last_key, last_value in selection.items():
+                # Accéder au premier sous-tuple (position du point)
+                position = last_value[0]  # Premier sous-tuple : position du point    
+
+
+                # Mettre à jour la valeur dans le dictionnaire
+                selection[last_key] = (last_value[0], last_value[1], tuple(newp))
+            print(last_selection)
+            # Mettre à jour old_data avec les nouvelles valeurs
+            old_data["selections"][-1]["ids"] = selection
         self.scene_viewer.endStateUndo()
         
+
     def onHandleToState(self, kwargs):
         """ Sets the node parms with the handle parms.
         """
@@ -164,9 +192,9 @@ class State(object):
         node = kwargs["node"]  
 
         final_matrix = self.build_transformation_matrix(parms)
-        pivot = hou.Vector3(parms["px"], parms["py"], parms["pz"]) + hou.Vector3(parms["tx"], parms["ty"], parms["tz"])
-        print(pivot)
-        tpivot = (pivot[0], pivot[1], pivot[2])
+        pivot = (parms["px"], parms["py"], parms["pz"])
+
+        
         
         
         # Récupérer les données précédentes stockées dans le parm "transform_data"
@@ -186,7 +214,7 @@ class State(object):
 
 
                 # Mettre à jour la valeur dans le dictionnaire
-                selection[last_key] = (last_value[0], final_matrix, tpivot)  # On met à jour le second sous-tuple
+                selection[last_key] = (last_value[0], final_matrix, pivot)  # On met à jour le second sous-tuple
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
