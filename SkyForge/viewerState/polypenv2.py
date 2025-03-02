@@ -88,23 +88,23 @@ class State(object):
         node.parm("sy").set(1)
         node.parm("sz").set(1)
 
-    def getSelectionIds(self, geo, sel_type, sel_str):
+    def getSelectionIds(self, geo, sel_type, sel_str, handle):
         """ Retourne les identifiants des éléments sélectionnés """
         if sel_type == hou.geometryType.Edges:
             return {
-                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
                 for e in geo.globEdges(sel_str)
                 for p in e.points()
             }
         elif sel_type == hou.geometryType.Points:
             return {
-            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
             for p in geo.globPoints(sel_str, ordered=False)
         }
 
         elif sel_type == hou.geometryType.Primitives:
             return {
-                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
                 for f in geo.globPrims(sel_str)
                 for p in f.points()
             }
@@ -155,8 +155,36 @@ class State(object):
     def onEndHandleToState(self, kwargs):
         """ Close the handle undo bracket.
         """
+        node = kwargs["node"]  
+        t = node.parmTuple("t").eval()
+        p = node.parmTuple("p").eval()
+        newp = hou.Vector3(t) + hou.Vector3(p)
+
+
+        # Récupérer les données précédentes stockées dans le parm "transform_data"
+        old_data_str = node.parm("transform_data").eval()
+        old_data = json.loads(old_data_str or "{}")
+
+        # Vérifier s'il y a des sélections
+        if "selections" in old_data:
+            # Récupérer la dernière sélection
+            last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+
+            # Accéder à "ids" qui est un dictionnaire retourné par getSelectionIds
+            selection = last_selection["ids"]
+            for last_key, last_value in selection.items():
+                # Accéder au premier sous-tuple (position du point)
+                position = last_value[0]  # Premier sous-tuple : position du point    
+
+
+                # Mettre à jour la valeur dans le dictionnaire
+                selection[last_key] = (last_value[0], last_value[1], tuple(newp))
+            print(last_selection)
+            # Mettre à jour old_data avec les nouvelles valeurs
+            old_data["selections"][-1]["ids"] = selection
         self.scene_viewer.endStateUndo()
         
+
     def onHandleToState(self, kwargs):
         """ Sets the node parms with the handle parms.
         """
@@ -164,8 +192,9 @@ class State(object):
         node = kwargs["node"]  
 
         final_matrix = self.build_transformation_matrix(parms)
-        pivot = hou.Vector3(parms["tx"], parms["ty"], parms["tz"]) + hou.Vector3(final_matrix[0])
-        tpivot = (pivot[0], pivot[1], pivot[2])
+        pivot = (parms["px"], parms["py"], parms["pz"])
+
+        
         
         
         # Récupérer les données précédentes stockées dans le parm "transform_data"
@@ -185,7 +214,7 @@ class State(object):
 
 
                 # Mettre à jour la valeur dans le dictionnaire
-                selection[last_key] = (last_value[0], final_matrix, tpivot)  # On met à jour le second sous-tuple
+                selection[last_key] = (last_value[0], final_matrix, pivot)  # On met à jour le second sous-tuple
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
@@ -223,26 +252,28 @@ class State(object):
             sel_type = selection.geometryType()
             sel_ids = selection
             sel_str = selection.selectionStrings()[0]
-            
+            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            handlePos = (bbox.center()[0], bbox.center()[1], bbox.center()[2])
             old_data_str = node.parm("transform_data").eval()   
 
             old_data = json.loads(node.parm("transform_data").eval() or "{}")
             old_data.setdefault("selections", [])
 
-            selection = self.getSelectionIds(geo, sel_type, sel_str)
+            selection = self.getSelectionIds(geo, sel_type, sel_str, handlePos)
             last_key, last_value = list(selection.items())[-1]  # Récupérer le dernier élément du dictionnaire (par exemple)
             position = last_value[0]  # Accéder au premier sous-tuple (position du point)
+            
             
 
             selection_data = {
             "type": str(sel_type),
-            "ids": self.getSelectionIds(geo, sel_type, sel_str),
+            "ids": self.getSelectionIds(geo, sel_type, sel_str, handlePos),
             "state": "selection"
             }
             old_data["selections"].append(selection_data)
             node.parm("transform_data").set(json.dumps(old_data))
 
-            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            
             # Mettre à jour les paramètres du nœud
             node.parm("px").set(bbox.center()[0])
             node.parm("py").set(bbox.center()[1])
