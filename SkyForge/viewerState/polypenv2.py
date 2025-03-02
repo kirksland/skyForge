@@ -44,40 +44,6 @@ class State(object):
             "pivot_ry",
             "pivot_rz" ]
 
-        # support for rendering drawable
-        self.prev_prim_num = -1
-        self.prim_selection = None
-        self.point_selection = None
-        self.edge_selection = None
-
-        self.selectionMode = None
-
-
-
-    def alignVector(v1, v2):
-        """ Aligns v1 to v2 and returns the resulting vector.
-        """
-        v1 = v1.normalized()
-        v2 = v2.normalized()
-        axis = v1.cross( v2 )
-
-        cosA = v1.dot( v2 )
-        k = 1.0 / (1.0 + cosA)
-
-        x = axis.x()
-        y = axis.y()
-        z = axis.z()
-        mat = hou.Matrix3( ((x * x * k) + cosA,
-                     (y * x * k) - z, 
-                     (z * x * k) + y,
-                     (x * y * k) + z,  
-                     (y * y * k) + cosA,      
-                     (z * y * k) - x,
-                     (x * z * k) - y,  
-                     (y * z * k) + x,  
-                     (z * z * k) + cosA) )
-
-        return mat.inverted().extractRotates()
 
     
     def initTransform(self, node):
@@ -112,12 +78,12 @@ class State(object):
     def getBoundingBox(self, geo, sel_type, sel_str):
         """ Retourne la bounding box en fonction du type de sélection """
         if sel_type == hou.geometryType.Primitives:
-            return geo.primBoundingBox(sel_str)
+            return geo.orientedPrimBoundingBox(sel_str)
         elif sel_type == hou.geometryType.Edges:
             edge_points = [p for e in geo.globEdges(sel_str) for p in e.points()]
-            return geo.pointBoundingBox(" ".join(str(p.number()) for p in edge_points))
+            return geo.orientedPointBoundingBox(" ".join(str(p.number()) for p in edge_points))
         elif sel_type == hou.geometryType.Points:
-            return geo.pointBoundingBox(sel_str)
+            return geo.orientedPointBoundingBox(sel_str)
         return hou.BoundingBox()
 
     def build_transformation_matrix(self, parms):
@@ -182,6 +148,8 @@ class State(object):
                 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
+            node.parm("transform_data").set(json.dumps(old_data))
+
         self.scene_viewer.endStateUndo()
         
     def onHandleToState(self, kwargs):
@@ -192,6 +160,7 @@ class State(object):
 
         final_matrix = self.build_transformation_matrix(parms)
         pivot = (parms["px"], parms["py"], parms["pz"])
+        
 
         # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data_str = node.parm("transform_data").eval()
@@ -210,12 +179,14 @@ class State(object):
 
                 # Mettre à jour la valeur dans le dictionnaire
                 selection[last_key] = (last_value[0], final_matrix, pivot)  # On met à jour le second sous-tuple
+                
 
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
 
             # Mettre à jour le parm transform_data avec le nouveau JSON
             node.parm("transform_data").set(json.dumps(old_data))
+            
 
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
@@ -235,6 +206,8 @@ class State(object):
         selection, node, state_parms = kwargs["selection"], kwargs["node"], kwargs["state_parms"]
         geo = self.geometry
         self.initTransform(node)
+        normal = hou.Vector3()
+
 
         if not selection or not selection.selectionStrings():
             self.xform_handle.show(False)
@@ -265,11 +238,25 @@ class State(object):
             old_data["selections"].append(selection_data)
             node.parm("transform_data").set(json.dumps(old_data))
 
-            
+
+            if "selections" in old_data:
+                # Récupérer la dernière sélection
+                last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+
+                # Accéder à "ids" qui est un dictionnaire retourné par getSelectionIds
+                selection = last_selection["ids"]
+                for last_key, last_value in selection.items():
+                    pt = geo.point(int(last_key))
+                    normal += hou.Vector3(pt.attribValue("N"))
+            viewerAxis = hou.Vector3(0.0, 1.0, 0.0)
+            rotation = alignVector(viewerAxis, normal)
             # Mettre à jour les paramètres du nœud
-            node.parm("px").set(bbox.center()[0])
-            node.parm("py").set(bbox.center()[1])
-            node.parm("pz").set(bbox.center()[2])
+            node.parmTuple("p").set(bbox.center())
+            node.parmTuple("pivot_r").set(rotation)
+            
+
+            #node.parmTuple("pivot_r").set(rotation)
+
             self.xform_handle.show(True)
             self.xform_handle.update()
         
@@ -280,6 +267,31 @@ class State(object):
         menuItems = kwargs["menu_item"]
         if menuItems == "clean":
             kwargs["node"].hdaModule().reset(kwargs["node"])
+
+def alignVector(v1, v2):
+    """ Aligns v1 to v2 and returns the resulting vector.
+    """
+    v1 = v1.normalized()
+    v2 = v2.normalized()
+    axis = v1.cross( v2 )
+
+    cosA = v1.dot( v2 )
+    k = 1.0 / (1.0 + cosA)
+
+    x = axis.x()
+    y = axis.y()
+    z = axis.z()
+    mat = hou.Matrix3( ((x * x * k) + cosA,
+                 (y * x * k) - z, 
+                 (z * x * k) + y,
+                 (x * y * k) + z,  
+                 (y * y * k) + cosA,      
+                 (z * y * k) - x,
+                 (x * z * k) - y,  
+                 (y * z * k) + x,  
+                 (z * z * k) + cosA) )
+
+    return mat.inverted().extractRotates()
 
 
 def createViewerStateTemplate():
