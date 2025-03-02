@@ -88,23 +88,23 @@ class State(object):
         node.parm("sy").set(1)
         node.parm("sz").set(1)
 
-    def getSelectionIds(self, geo, sel_type, sel_str):
+    def getSelectionIds(self, geo, sel_type, sel_str, handle):
         """ Retourne les identifiants des éléments sélectionnés """
         if sel_type == hou.geometryType.Edges:
             return {
-                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
                 for e in geo.globEdges(sel_str)
                 for p in e.points()
             }
         elif sel_type == hou.geometryType.Points:
             return {
-            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+            p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
             for p in geo.globPoints(sel_str, ordered=False)
         }
 
         elif sel_type == hou.geometryType.Primitives:
             return {
-                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), (0.0, 0.0, 0.0))
+                p.number(): (tuple(p.position()), ((0.0, 0.0, 0.0),(0.0, 0.0, 0.0), (1.0, 1.0, 1.0)), handle)
                 for f in geo.globPrims(sel_str)
                 for p in f.points()
             }
@@ -164,7 +164,8 @@ class State(object):
         node = kwargs["node"]  
 
         final_matrix = self.build_transformation_matrix(parms)
-        pivot = hou.Vector3(parms["tx"], parms["ty"], parms["tz"]) + hou.Vector3(final_matrix[0])
+        pivot = hou.Vector3(parms["px"], parms["py"], parms["pz"]) + hou.Vector3(parms["tx"], parms["ty"], parms["tz"])
+        print(pivot)
         tpivot = (pivot[0], pivot[1], pivot[2])
         
         
@@ -223,26 +224,28 @@ class State(object):
             sel_type = selection.geometryType()
             sel_ids = selection
             sel_str = selection.selectionStrings()[0]
-            
+            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            handlePos = (bbox.center()[0], bbox.center()[1], bbox.center()[2])
             old_data_str = node.parm("transform_data").eval()   
 
             old_data = json.loads(node.parm("transform_data").eval() or "{}")
             old_data.setdefault("selections", [])
 
-            selection = self.getSelectionIds(geo, sel_type, sel_str)
+            selection = self.getSelectionIds(geo, sel_type, sel_str, handlePos)
             last_key, last_value = list(selection.items())[-1]  # Récupérer le dernier élément du dictionnaire (par exemple)
             position = last_value[0]  # Accéder au premier sous-tuple (position du point)
+            
             
 
             selection_data = {
             "type": str(sel_type),
-            "ids": self.getSelectionIds(geo, sel_type, sel_str),
+            "ids": self.getSelectionIds(geo, sel_type, sel_str, handlePos),
             "state": "selection"
             }
             old_data["selections"].append(selection_data)
             node.parm("transform_data").set(json.dumps(old_data))
 
-            bbox = self.getBoundingBox(geo, sel_type, sel_str)
+            
             # Mettre à jour les paramètres du nœud
             node.parm("px").set(bbox.center()[0])
             node.parm("py").set(bbox.center()[1])
