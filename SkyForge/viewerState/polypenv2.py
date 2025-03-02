@@ -83,7 +83,7 @@ class State(object):
     def initTransform(self, node):
         for parm_name in self.parm_names:
             node.parm(parm_name).set(0)
-        node.parm("group").set("")        
+       
         node.parm("sx").set(1)
         node.parm("sy").set(1)
         node.parm("sz").set(1)
@@ -129,6 +129,8 @@ class State(object):
         matrix_list = (t, r, s)
 
         return matrix_list
+
+
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
@@ -160,7 +162,6 @@ class State(object):
         p = node.parmTuple("p").eval()
         newp = hou.Vector3(t) + hou.Vector3(p)
 
-
         # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data_str = node.parm("transform_data").eval()
         old_data = json.loads(old_data_str or "{}")
@@ -176,15 +177,13 @@ class State(object):
                 # Accéder au premier sous-tuple (position du point)
                 position = last_value[0]  # Premier sous-tuple : position du point    
 
-
                 # Mettre à jour la valeur dans le dictionnaire
                 selection[last_key] = (last_value[0], last_value[1], tuple(newp))
-            print(last_selection)
+                
             # Mettre à jour old_data avec les nouvelles valeurs
             old_data["selections"][-1]["ids"] = selection
         self.scene_viewer.endStateUndo()
         
-
     def onHandleToState(self, kwargs):
         """ Sets the node parms with the handle parms.
         """
@@ -194,9 +193,6 @@ class State(object):
         final_matrix = self.build_transformation_matrix(parms)
         pivot = (parms["px"], parms["py"], parms["pz"])
 
-        
-        
-        
         # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data_str = node.parm("transform_data").eval()
         old_data = json.loads(old_data_str or "{}")
@@ -211,7 +207,6 @@ class State(object):
             for last_key, last_value in selection.items():
                 # Accéder au premier sous-tuple (position du point)
                 position = last_value[0]  # Premier sous-tuple : position du point    
-
 
                 # Mettre à jour la valeur dans le dictionnaire
                 selection[last_key] = (last_value[0], final_matrix, pivot)  # On met à jour le second sous-tuple
@@ -225,7 +220,6 @@ class State(object):
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
 
-        
     def onStateToHandle(self, kwargs):
         """ Sets the handle parms with the node parms.
         """                       
@@ -263,8 +257,6 @@ class State(object):
             last_key, last_value = list(selection.items())[-1]  # Récupérer le dernier élément du dictionnaire (par exemple)
             position = last_value[0]  # Accéder au premier sous-tuple (position du point)
             
-            
-
             selection_data = {
             "type": str(sel_type),
             "ids": self.getSelectionIds(geo, sel_type, sel_str, handlePos),
@@ -281,12 +273,13 @@ class State(object):
             self.xform_handle.show(True)
             self.xform_handle.update()
         
-            
-            
-           
-        
         # Must return True to accept the selection
         return False
+
+    def onMenuAction(self, kwargs):
+        menuItems = kwargs["menu_item"]
+        if menuItems == "clean":
+            kwargs["node"].hdaModule().reset(kwargs["node"])
 
 
 def createViewerStateTemplate():
@@ -299,7 +292,7 @@ def createViewerStateTemplate():
 
     template = hou.ViewerStateTemplate(state_typename, state_label, state_cat)
     template.bindFactory(State)
-    template.bindIcon("$HOME/houdini20.5/otls/Icon/polyPen4.png")
+    template.bindIcon("$SK_ICONS/polyPen4.png")
 
     hotkey_definitions = hou.PluginHotkeyDefinitions()
     hk1 = su.defineHotkey(hotkey_definitions,
@@ -310,12 +303,10 @@ def createViewerStateTemplate():
     template.bindHotkeyDefinitions(hotkey_definitions)
     template.bindHandle( "xform", "Transform" )
 
+
     m = hou.ViewerStateMenu("menu","Polypen")
 
-    m.addSeparator()
-    m.addRadioStrip("radio_strip","radio","radio_item1")
-    m.addRadioStripItem("radio_strip","radio_item1","Radio1",hk2)
-    m.addRadioStripItem("radio_strip","radio_item2","Radio2", hk1)
+    m.addActionItem("clean","Clean transform")
 
     template.bindMenu(m)
 
@@ -333,5 +324,7 @@ def createViewerStateTemplate():
         primitive_types=[], 
         allow_other_sops=False, 
         hotkey=hk2)
+
+
 
     return template

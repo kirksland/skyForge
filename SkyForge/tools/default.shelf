@@ -152,7 +152,7 @@ class HoudiniContextMenu(QtWidgets.QMenu):
 
     def invoke_shelf_tool(self):
         """ Invoque un shelf tool existant. """
-        tool_name = hou.shelves.tool("QuickSubdivide")# Remplace par le nom interne de ton outil
+        tool_name = hou.shelves.tool("QuickSubdivide")
         tool = tool_name.script()
         exec(tool)
     
