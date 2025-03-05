@@ -77,15 +77,83 @@ class State(object):
         matrix_list = (t, r, s)
 
         return matrix_list
+
+
+    def normal(self, geo, sel_type, sel_str):
+        normal = hou.Vector3()
+        if sel_type == hou.geometryType.Primitives:
+
+            prim = geo.globPrims(sel_str)
+            for p in prim:
+                vertices = geo.globVertices(str(p.number()))
+                for v in vertices:
+                    n = v.attribValue("N")
+                    normal += hou.Vector3(n)
+                    
+        elif sel_type == hou.geometryType.Points:
+            # Récupérer les points via la chaîne (ex: "0 1 2 3")
+            
+            points = geo.globPoints(sel_str)
+            ids = [p.number() for p in points]
+            ids_set = set(ids)
+
+            if len(ids_set) < 4 :
+                for p in points:
+                    v = p.vertices()
+                    for ve in v:
+                        n = ve.attribValue("N")
+                        normal += hou.Vector3(n)
+            else:           
+                # Récupérer toutes les primitives associées aux points de la sélection
+                prims_set = set()
+                for pt in points:
+                    for prim in pt.prims():
+                        prims_set.add(prim)
+
+                # Filtrer pour ne garder que les primitives qui contiennent au moins 4 points de la sélection
+                internal_prims = []
+                for prim in prims_set:
+                    prim_ptID = set()
+                    for pt in prim.points():
+                        prim_ptID.add(pt.number())
+                    # Calculer l'intersection entre les IDs de la sélection et ceux de la primitive
+                    common_ids = ids_set.intersection(prim_ptID)
+                    if len(common_ids) >= 4:
+                        internal_prims.append(prim)
+
+                # Afficher le résultat
+                print(internal_prims)
+                for p in internal_prims:
+                    vertices = geo.globVertices(str(p.number()))
+                    for v in vertices:
+                        n = v.attribValue("N")
+                        normal += hou.Vector3(n)
+                    
+        elif sel_type == hou.geometryType.Edges:
+            edges = geo.globEdges(sel_str)
+            edge_set = set()
+            for edge in edges:
+                edge_point = edge.points()
+                for p in edge_point:
+                    edge_set.add(p.number())
+
+            for p in edge_set:
+                point = geo.point(p)
+                v = point.vertices()
+                for ve in v:
+                    n = ve.attribValue("N")
+                    normal += hou.Vector3(n) 
+        return normal
         #---------------------------------------------------------------------------
         #---------------------------------------------------------------------------
 
     def onEnter(self,kwargs):
         """ Called on node bound states when it starts
         """
-        node = kwargs["node"]
+        node, state_parm = kwargs["node"], kwargs["state_parms"]
         self.geometry = node.geometry()
         self.xform_handle.show(False)
+        
 
     def onExit(self,kwargs):
         """ Called when the state terminates
@@ -94,10 +162,11 @@ class State(object):
 
     def onSelection(self, kwargs):
         """ Called when a selector has selected something
-        """        
+        """   
         selection, node = kwargs["selection"], kwargs["node"]
         geo = self.geometry
         self.initTransform(node)
+
 
         if not selection or not selection.selectionStrings():
             self.xform_handle.show(False)
@@ -106,12 +175,16 @@ class State(object):
         sel_type = selection.geometryType()
         sel_str = selection.selectionStrings()[0]
         ids = self.getPointIds(geo, sel_type, sel_str)
-        normal = hou.Vector3()
 
+
+        normal = self.normal(geo, sel_type, sel_str)
+
+        """
+        normal = hou.Vector3()
         for pt in ids:
             n = pt.attribValue("Vn")
             normal += hou.Vector3(n)
-            
+        """   
         handlePos = tuple(self.getBoundingBox(geo, sel_type, sel_str).center())
         handleRot = tuple(alignVector(hou.Vector3(0,1,0),normal))
 
@@ -133,6 +206,7 @@ class State(object):
         node.parmTuple("pivot_r").set(handleRot)
         self.xform_handle.show(True)
         self.xform_handle.update()
+
         
         return False 
 
@@ -154,7 +228,6 @@ class State(object):
             selection[key] = (value[0], offset_matrix, pivot)                                        # On met à jour le second sous-tuple
         old_data["selections"][-1]["ids"] = selection
 
-        
         node.parm("transform_data").set(json.dumps(old_data))                                        # Mettre à jour le parm transform_data avec le nouveau JSON
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
@@ -171,6 +244,7 @@ class State(object):
         t = node.parmTuple("t").eval()
         p = node.parmTuple("p").eval()
         newp = hou.Vector3(t) + hou.Vector3(p)
+
 
         old_data_str = node.parm("transform_data").eval()   # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data = json.loads(old_data_str or "{}")
@@ -194,6 +268,7 @@ class State(object):
         for parm_name in self.parm_names:
             parms[parm_name] = node.parm(parm_name).eval()        
         self.xform_handle.show(True)
+
 
     def onMenuAction(self, kwargs):
         menuItems = kwargs["menu_item"]
@@ -225,6 +300,7 @@ def alignVector(v1, v2):
 
         return mat.inverted().extractRotates()
 
+
 def createViewerStateTemplate():
     """ Mandatory entry point to create and return the viewer state 
         template to register. """
@@ -235,7 +311,7 @@ def createViewerStateTemplate():
 
     template = hou.ViewerStateTemplate(state_typename, state_label, state_cat)
     template.bindFactory(State)
-    template.bindIcon("$HOME/houdini20.5/otls/Icon/polyPen4.png")
+    template.bindIcon("$SK_ICONS/polyPen4.png")
 
     hotkey_definitions = hou.PluginHotkeyDefinitions()
     hk1 = su.defineHotkey(hotkey_definitions,
