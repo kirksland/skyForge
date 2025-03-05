@@ -1,0 +1,39 @@
+{
+    "file_format": "2.0",
+    "name": "SkyForge",
+    "enable": true,
+    "env": [
+        {
+            "HPD": "$HOUDINI_USER_PREF_DIR/packages/SkyForge"
+        },
+        {
+            "PYTHONPATH": "$HPD/python"
+        },
+        {
+            "HOUDINI_VIEWERSTATE_PATH": "$HPD/viewerState"
+        },
+        {
+            "HOUDINI_OTLSCAN_PATH": "$HPD/hda"
+        },
+        {
+            "HOUDINI_TOOLBAR_PATH": "$HPD/tools"
+        },
+        {
+            "PACK_PATH": "$HOUDINI_USER_PREF_DIR/packages"
+        },
+        {
+            "HOUDINI_DESK_PATH": "$HPD/desktop"
+        },
+        {
+            "SK_ICONS": "$HPD/config/icons"
+        }
+
+    ],
+    "oplibraries": [
+      {
+        "path": "HPD/hda/sop_justi.libtest.1.0.hda",
+        
+      }
+    ]
+    
+}
