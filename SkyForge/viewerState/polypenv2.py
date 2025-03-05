@@ -118,7 +118,6 @@ class State(object):
 
         handle = (handlePos,handleRot)
 
-        print(handlePos)
         old_data = json.loads(node.parm("transform_data").eval() or "{}")
         old_data.setdefault("selections", [])
 
