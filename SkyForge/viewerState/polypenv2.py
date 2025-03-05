@@ -92,34 +92,42 @@ class State(object):
                     
         elif sel_type == hou.geometryType.Points:
             # Récupérer les points via la chaîne (ex: "0 1 2 3")
+            
             points = geo.globPoints(sel_str)
             ids = [p.number() for p in points]
             ids_set = set(ids)
 
-            # Récupérer toutes les primitives associées aux points de la sélection
-            prims_set = set()
-            for pt in points:
-                for prim in pt.prims():
-                    prims_set.add(prim)
+            if len(ids_set) < 4 :
+                for p in points:
+                    v = p.vertices()
+                    for ve in v:
+                        n = ve.attribValue("N")
+                        normal += hou.Vector3(n)
+            else:           
+                # Récupérer toutes les primitives associées aux points de la sélection
+                prims_set = set()
+                for pt in points:
+                    for prim in pt.prims():
+                        prims_set.add(prim)
 
-            # Filtrer pour ne garder que les primitives qui contiennent au moins 4 points de la sélection
-            internal_prims = []
-            for prim in prims_set:
-                prim_ptID = set()
-                for pt in prim.points():
-                    prim_ptID.add(pt.number())
-                # Calculer l'intersection entre les IDs de la sélection et ceux de la primitive
-                common_ids = ids_set.intersection(prim_ptID)
-                if len(common_ids) >= 4:
-                    internal_prims.append(prim)
+                # Filtrer pour ne garder que les primitives qui contiennent au moins 4 points de la sélection
+                internal_prims = []
+                for prim in prims_set:
+                    prim_ptID = set()
+                    for pt in prim.points():
+                        prim_ptID.add(pt.number())
+                    # Calculer l'intersection entre les IDs de la sélection et ceux de la primitive
+                    common_ids = ids_set.intersection(prim_ptID)
+                    if len(common_ids) >= 4:
+                        internal_prims.append(prim)
 
-            # Afficher le résultat
-            print(internal_prims)
-            for p in internal_prims:
-                vertices = geo.globVertices(str(p.number()))
-                for v in vertices:
-                    n = v.attribValue("N")
-                    normal += hou.Vector3(n)
+                # Afficher le résultat
+                print(internal_prims)
+                for p in internal_prims:
+                    vertices = geo.globVertices(str(p.number()))
+                    for v in vertices:
+                        n = v.attribValue("N")
+                        normal += hou.Vector3(n)
                     
         elif sel_type == hou.geometryType.Edges:
             edges = geo.globEdges(sel_str)
