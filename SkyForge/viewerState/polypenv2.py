@@ -303,7 +303,7 @@ def createViewerStateTemplate():
 
     template = hou.ViewerStateTemplate(state_typename, state_label, state_cat)
     template.bindFactory(State)
-    template.bindIcon("$HOME/houdini20.5/otls/Icon/polyPen4.png")
+    template.bindIcon("$SK_ICONS/polyPen4.png")
 
     hotkey_definitions = hou.PluginHotkeyDefinitions()
     hk1 = su.defineHotkey(hotkey_definitions,
