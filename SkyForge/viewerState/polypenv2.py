@@ -112,7 +112,6 @@ class State(object):
             n = pt.attribValue("Vn")
             normal += hou.Vector3(n)
             
-
         handlePos = tuple(self.getBoundingBox(geo, sel_type, sel_str).center())
         handleRot = tuple(alignVector(hou.Vector3(0,1,0),normal))
 
@@ -143,28 +142,20 @@ class State(object):
         parms = kwargs["parms"]
         node = kwargs["node"]  
 
-        # Récupérer les données précédentes stockées dans le parm "transform_data"
-        old_data_str = node.parm("transform_data").eval()
+        old_data_str = node.parm("transform_data").eval()                                           # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data = json.loads(old_data_str or "{}")
 
-        offset_matrix = self.build_transformation_matrix(parms)
+        offset_matrix = self.build_transformation_matrix(parms)                                     # creer un tupple qui represente les parametres de notre matrice
         pivot = ((parms["px"], parms["py"], parms["pz"]),(parms["pivot_rx"], parms["pivot_ry"], parms["pivot_rz"]))
 
-        # Récupérer la dernière sélection
-        last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
-
-        # Accéder à "ids" qui est un dictionnaire retourné par setDataIds
-        selection = last_selection["ids"]
+        last_selection = old_data["selections"][-1]                                                 # dernier élément de la liste "selections"
+        selection = last_selection["ids"]                       
         for key, value in selection.items():
-            # Mettre à jour la valeur dans le dictionnaire
-            selection[key] = (value[0], offset_matrix, pivot)  # On met à jour le second sous-tuple
-
-        # Mettre à jour old_data avec les nouvelles valeurs
+            selection[key] = (value[0], offset_matrix, pivot)                                        # On met à jour le second sous-tuple
         old_data["selections"][-1]["ids"] = selection
 
-        # Mettre à jour le parm transform_data avec le nouveau JSON
-        node.parm("transform_data").set(json.dumps(old_data))
-
+        
+        node.parm("transform_data").set(json.dumps(old_data))                                        # Mettre à jour le parm transform_data avec le nouveau JSON
         for parm_name in self.parm_names:
             node.parm(parm_name).set(parms[parm_name])
 
@@ -181,29 +172,20 @@ class State(object):
         p = node.parmTuple("p").eval()
         newp = hou.Vector3(t) + hou.Vector3(p)
 
-        # Récupérer les données précédentes stockées dans le parm "transform_data"
-        old_data_str = node.parm("transform_data").eval()
+        old_data_str = node.parm("transform_data").eval()   # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data = json.loads(old_data_str or "{}")
 
         # Vérifier s'il y a des sélections
         if "selections" in old_data:
-            # Récupérer la dernière sélection
-            last_selection = old_data["selections"][-1]  # Le dernier élément de la liste "selections"
+            
+            last_selection = old_data["selections"][-1]  # dernier élément de la liste "selections"
+            selection = last_selection["ids"]            # Accéder à "ids" qui est un dictionnaire retourné par setDataIds
 
-            # Accéder à "ids" qui est un dictionnaire retourné par setDataIds
-            selection = last_selection["ids"]
             for last_key, last_value in selection.items():
-                # Accéder au premier sous-tuple (position du point)
-                position = last_value[0]  # Premier sous-tuple : position du point    
-
-                # Mettre à jour la valeur dans le dictionnaire
-                selection[last_key] = (last_value[0], last_value[1], tuple(newp))
-            # Mettre à jour old_data avec les nouvelles valeurs
+                selection[last_key] = (last_value[0], last_value[1], tuple(newp))   # Mettre à jour la valeur dans le dictionnaire
             old_data["selections"][-1]["ids"] = selection
         self.scene_viewer.endStateUndo()
         
-
-  
     def onStateToHandle(self, kwargs):
         """ Sets the handle parms with the node parms.
         """                       
