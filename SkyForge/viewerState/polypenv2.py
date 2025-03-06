@@ -122,7 +122,7 @@ class State(object):
                         internal_prims.append(prim)
 
                 # Afficher le résultat
-                print(internal_prims)
+
                 for p in internal_prims:
                     vertices = geo.globVertices(str(p.number()))
                     for v in vertices:
@@ -218,19 +218,19 @@ class State(object):
 
         old_data_str = node.parm("transform_data").eval()                                           # Récupérer les données précédentes stockées dans le parm "transform_data"
         old_data = json.loads(old_data_str or "{}")
+        if old_data:
+            offset_matrix = self.build_transformation_matrix(parms)                                     # creer un tupple qui represente les parametres de notre matrice
+            pivot = ((parms["px"], parms["py"], parms["pz"]),(parms["pivot_rx"], parms["pivot_ry"], parms["pivot_rz"]))
 
-        offset_matrix = self.build_transformation_matrix(parms)                                     # creer un tupple qui represente les parametres de notre matrice
-        pivot = ((parms["px"], parms["py"], parms["pz"]),(parms["pivot_rx"], parms["pivot_ry"], parms["pivot_rz"]))
+            last_selection = old_data["selections"][-1]                                                 # dernier élément de la liste "selections"
+            selection = last_selection["ids"]                       
+            for key, value in selection.items():
+                selection[key] = (value[0], offset_matrix, pivot)                                        # On met à jour le second sous-tuple
+            old_data["selections"][-1]["ids"] = selection
 
-        last_selection = old_data["selections"][-1]                                                 # dernier élément de la liste "selections"
-        selection = last_selection["ids"]                       
-        for key, value in selection.items():
-            selection[key] = (value[0], offset_matrix, pivot)                                        # On met à jour le second sous-tuple
-        old_data["selections"][-1]["ids"] = selection
-
-        node.parm("transform_data").set(json.dumps(old_data))                                        # Mettre à jour le parm transform_data avec le nouveau JSON
-        for parm_name in self.parm_names:
-            node.parm(parm_name).set(parms[parm_name])
+            node.parm("transform_data").set(json.dumps(old_data))                                        # Mettre à jour le parm transform_data avec le nouveau JSON
+            for parm_name in self.parm_names:
+                node.parm(parm_name).set(parms[parm_name])
 
     def onBeginHandleToState(self, kwargs):
         """ Open an undo bracket for the handle operations.
