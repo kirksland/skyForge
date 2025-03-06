@@ -179,7 +179,9 @@ class HoudiniContextMenu(QtWidgets.QMenu):
             # Utiliser directement les objets d'Ã©numÃ©ration comme clÃ©s
             color_schemes = {
                 hou.viewportColorScheme.Dark: lambda: settings.setColorScheme(hou.viewportColorScheme.Grey),
-                hou.viewportColorScheme.Grey: lambda: settings.setColorScheme(hou.viewportColorScheme.Dark)
+                hou.viewportColorScheme.Grey: lambda: settings.setColorScheme(hou.viewportColorScheme.Light),
+                hou.viewportColorScheme.Light: lambda: settings.setColorScheme(hou.viewportColorScheme.Dark)
+
             }
             
             # VÃ©rifier si le schÃ©ma actuel est dans notre dictionnaire
