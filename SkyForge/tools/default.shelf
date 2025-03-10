@@ -14,6 +14,11 @@
   <toolshelf name="SkyForgeShelf" label="SkyForge">
     <memberTool name="QuickSubdivide"/>
     <memberTool name="skyForgeMenu"/>
+    <memberTool name="SKT_relax"/>
+    <memberTool name="SK_boolean"/>
+    <memberTool name="SK_box"/>
+    <memberTool name="SK_sharp_edge"/>
+    <memberTool name="SK_SwitchNode"/>
   </toolshelf>
 
   <tool name="QuickSubdivide" label="Quick Subdivide" icon="$SK_ICONS/SubdivideSop.png">
@@ -92,7 +97,7 @@ class HoudiniContextMenu(QtWidgets.QMenu):
         super(HoudiniContextMenu, self).__init__(parent)
         
         home_dir = os.path.expandvars("$HOME")
-        self.setMinimumWidth(250)
+        self.setMinimumWidth(200)
         
         
         subIcon = os.path.join(home_dir,"houdini20.5", "otls", "Icon","subdivideSop")
@@ -101,7 +106,7 @@ class HoudiniContextMenu(QtWidgets.QMenu):
          # Ajouter l'entÃªte "Skyforge" avec une QLabel personnalisÃ©e
         header_label = QtWidgets.QLabel("Skyforge")
         header_label.setAlignment(QtCore.Qt.AlignCenter)
-        header_label.setStyleSheet("color: #3498DB; font-size: 21px; font-weight: bold; padding: 3px; min-width: 150px;")
+        header_label.setStyleSheet("color: #3498DB; font-size: 21px; font-weight: bold; padding: 3px; min-width: 100px;")
         header_widget_action = QtWidgets.QWidgetAction(self)
         header_widget_action.setDefaultWidget(header_label)
         self.addAction(header_widget_action)
@@ -111,10 +116,11 @@ class HoudiniContextMenu(QtWidgets.QMenu):
 
         self.addAction("â Subdivide  ", self.invoke_shelf_tool)
         self.addSeparator()
-        self.addAction("ð Reload python  ", self.reloadPackage)
+        self.addAction("â³ Reload python  ", self.reloadPackage)
         self.addAction("ð Scan Tools  ", self.scanShelfTool)
         self.addAction("ð Clear console  ", self.clearConsole)
-        self.addAction("ð Background  ", self.backgroundColor)
+        self.addAction("ð¨ Background  ", self.backgroundColor)
+        self.addAction("ð Relax  ", self.SKT_relax)
         
 
          # Personnalisation du style
@@ -125,13 +131,13 @@ class HoudiniContextMenu(QtWidgets.QMenu):
                 border: 1px solid #555;
                 padding: 5px;
                 font-size: 15px;
-                min-width: 150px;  /* Largeur minimale */
+                min-width: 100px;  /* Largeur minimale */
 
             }
             QMenu::item {
                 padding: 8px 25px;  /* Top/bottom, left/right padding */
                 margin: 2px 0px;
-                min-width: 150px;
+                min-width: 100px;
             }
             QMenu::item:selected {
                 background-color: #505050;
@@ -154,6 +160,13 @@ class HoudiniContextMenu(QtWidgets.QMenu):
         tool_name = hou.shelves.tool("QuickSubdivide")# Remplace par le nom interne de ton outil
         tool = tool_name.script()
         exec(tool)
+        
+    def SKT_relax(self):
+        """ Invoque un shelf tool existant. """
+        tool_name = hou.shelves.tool("SKT_relax")# Remplace par le nom interne de ton outil
+        tool = tool_name.script()
+        exec(tool)
+        
     
     def reloadPackage(self):
         manager = sForge.packageManager()

@@ -6,7 +6,7 @@ Author:         justi
 Date Created:   February 13, 2025 - 01:05:41
 """
 
-
+import sForge
 import hou
 import viewerstate.utils as su
 import json
@@ -30,6 +30,7 @@ class State(object):
         "pivot_rx", "pivot_ry", "pivot_rz"
         ]
 
+        self.gi = None
     def initTransform(self, node):
         for parm in self.parm_names:
             node.parm(parm).set(1 if parm.startswith("s") else 0)
@@ -153,6 +154,8 @@ class State(object):
         node, state_parm = kwargs["node"], kwargs["state_parms"]
         self.geometry = node.geometry()
         self.xform_handle.show(False)
+        self.gi = su.GeometryIntersector(self.geometry, self.scene_viewer)
+        print(dir(self.gi))
         
 
     def onExit(self,kwargs):
@@ -268,6 +271,25 @@ class State(object):
         for parm_name in self.parm_names:
             parms[parm_name] = node.parm(parm_name).eval()        
         self.xform_handle.show(True)
+
+    def onMouseEvent(self, kwargs):
+        """ Process mouse and tablet events
+        """
+        ui_event = kwargs["ui_event"]
+        dev = ui_event.device()
+        #print("________________________",dev)
+        rorigin, rdir = ui_event.ray()
+
+        intersect = self.gi.intersect(rorigin, rdir)
+        if intersect != 0 and dev.isShiftKey():
+            closest_edge = self.gi._closest_edge()
+            if closest_edge is not None:
+                if self.gi._distance_to_edge(self.gi.position, closest_edge) < 0.01 :
+                    closest_edge_id = closest_edge.edgeId()
+                    forge = sForge.toolKit()
+                    opposite_edge = forge.getOppositeEdge(self.geometry, closest_edge.edgeId())
+                    print(opposite_edge)
+
 
 
     def onMenuAction(self, kwargs):
