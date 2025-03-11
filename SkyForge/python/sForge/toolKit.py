@@ -164,6 +164,7 @@ class toolKit:
                     pos = current_node.position()
                     new_node.setPosition([pos[0], pos[1] - 1])
                     self.toggleFlag(new_node, current_node)
+                    current_node.setTemplateFlag(True)
                     new_node.setInput(0,current_node)
                     return new_node
             else: 
