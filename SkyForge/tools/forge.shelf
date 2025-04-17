@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="forge" label="Forge">
+    <memberTool name="menu"/>
+  </toolshelf>
+
+  <tool name="menu" label="ForgeMenu" icon="$SK_icons/menu-bar.png">
+    <toolMenuContext name="viewer">
+      <contextNetType>OBJ</contextNetType>
+      <contextNetType>SOP</contextNetType>
+      <contextNetType>DOP</contextNetType>
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="cop_viewer">
+      <contextNetType>COP2</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>OBJ</contextNetType>
+    </toolMenuContext>
+    <script scriptType="python"><![CDATA[import hou
+from PySide2 import QtWidgets, QtGui, QtCore
+import sForge
+import os
+
+class HoudiniContextMenu(QtWidgets.QMenu):
+    """ Menu contextuel vertical personnalisÃÂ© pour Houdini. """
+
+    def __init__(self, parent=None):
+        super(HoudiniContextMenu, self).__init__(parent)
+        self.manager = sForge.packageManager()
+        self.toolkit = sForge.toolKit()
+        self.viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
+        self.setMinimumWidth(200)
+
+         # Ajouter l'entÃÂªte "Skyforge" avec une QLabel personnalisÃÂ©e
+        header_label = QtWidgets.QLabel("Skyforge")
+        header_label.setAlignment(QtCore.Qt.AlignCenter)
+        header_label.setStyleSheet("color: #3498DB; font-size: 21px; font-weight: bold; padding: 3px; min-width: 100px;")
+        header_widget_action = QtWidgets.QWidgetAction(self)
+        header_widget_action.setDefaultWidget(header_label)
+        self.addAction(header_widget_action)
+        self.addSeparator()
+
+        # Ajouter des actions au menu
+
+        self.addAction(" Subdivide  ", self.invoke_shelf_tool)
+        self.addSeparator()
+        self.addAction(" Reload python  ", self.reloadPackage)
+        self.addAction(" Clear console  ", self.clearConsole)
+        self.addAction(" Background  ", self.backgroundColor)
+        my_hda = self.get_hda()
+        for h in my_hda:
+
+            self.addAction(h.split("::")[1], lambda h=h: self.CreateNode(h))
+        
+        
+
+         # Personnalisation du style
+        self.setStyleSheet("""
+            QMenu {
+                background-color: #282828;
+                color: white;
+                border: 1px solid #555;
+                padding: 5px;
+                font-size: 15px;
+                min-width: 100px;  /* Largeur minimale */
+
+            }
+            QMenu::item {
+                padding: 8px 25px;  /* Top/bottom, left/right padding */
+                margin: 2px 0px;
+                min-width: 100px;
+            }
+            QMenu::item:selected {
+                background-color: #505050;
+            }
+            QMenu::separator {
+                height: 1px;
+                background: #555;
+                margin: 5px 10px;
+            }
+        """)
+    def CreateNode(self,node):
+        self.toolkit.spawnNode(node)
+
+    def get_hda(self):
+        my_hda = self.manager.scanFolder()
+        my_def = []
+        for hda in my_hda:
+            path = os.path.expandvars("$HPD/hda")
+            extension = ".hdanc"
+            file = os.path.join(path,hda + extension)
+            hda_defs = hou.hda.definitionsInFile(file)
+            my_def.append(hda_defs[0].nodeTypeName())
+        
+        return my_def
+
+    def show_menu(self):
+        """ Affiche le menu ÃÂ  la position de la souris. """
+        cursor_pos = QtGui.QCursor.pos()
+        self.move(cursor_pos)
+        self.exec_()
+
+    def invoke_shelf_tool(self):
+        """ Invoque un shelf tool existant. """
+        tool_name = hou.shelves.tool("QuickSubdivide")# Remplace par le nom interne de ton outil
+        tool = tool_name.script()
+        exec(tool)
+        
+    def SKT_relax(self):
+        """ Invoque un shelf tool existant. """
+        tool_name = hou.shelves.tool("SKT_relax")# Remplace par le nom interne de ton outil
+        tool = tool_name.script()
+        exec(tool)
+        
+    
+    def reloadPackage(self):
+       
+        self.manager.reloadPython()
+        hou.ui.reloadPackage("$HOUDINI_USER_PREF_DIR/packages/SkyForgePackage.json")
+
+    def scanShelfTool(self):
+        toolbar_path = hou.expandString("$HPD/tools")
+        shelf_filename = "default.shelf"
+        shelf_data = self.manager.scanShelfTool(toolbar_path,shelf_filename)
+
+    def clearConsole(self):
+        print('\n'*500)
+        print("console cleared")
+        
+    def backgroundColor(self):        
+        
+        if self.viewer:
+            settings = self.viewer.curViewport().settings()
+            scheme = settings.colorScheme()
+            
+            # Utiliser directement les objets d'ÃÂ©numÃÂ©ration comme clÃÂ©s
+            color_schemes = {
+                hou.viewportColorScheme.Dark: lambda: settings.setColorScheme(hou.viewportColorScheme.Grey),
+                hou.viewportColorScheme.Grey: lambda: settings.setColorScheme(hou.viewportColorScheme.Light),
+                hou.viewportColorScheme.Light: lambda: settings.setColorScheme(hou.viewportColorScheme.Dark)
+
+            }
+            
+            # VÃÂ©rifier si le schÃÂ©ma actuel est dans notre dictionnaire
+            if scheme in color_schemes:
+                color_schemes[scheme]()  # Utiliser l'objet d'ÃÂ©numÃÂ©ration directement comme clÃÂ©
+            
+# Fonction pour appeler le menu
+def show_custom_menu():
+    menu = HoudiniContextMenu()
+    menu.show_menu()
+
+# ExÃÂ©cuter le menu
+show_custom_menu()]]></script>
+  </tool>
+</shelfDocument>

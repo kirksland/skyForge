@@ -115,6 +115,7 @@ class toolKit:
 
         """
 
+
         if isSelected == True:
             newNode.setRenderFlag(True)
             newNode.setDisplayFlag(True)
@@ -134,43 +135,71 @@ class toolKit:
             previousNode.setDisplayFlag(False)
             previousNode.setSelected(True)
 
-    def connectInput(self,node_input, node_output):
-        node_input.setInput(0, node_output)
 
-    def spawnNode(self, nodeName):
+    def spawnNode(self, nodeName, Isparent=True):
 
         viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
         if viewer:
             current_node = viewer.currentNode()
+            node_type = current_node.type()
+            definition = node_type.definition()
+            if definition is not None :
+                name = definition.nodeType()
+                tools = definition.tools()
+                tool_list = [v for k, v in tools.items()]
+                tool = tool_list[0]
+                sub = tool.toolMenuLocations()
+                print(node_type)
+                print(definition)
+
+                print(name)
+                print(tools)
+                print(sub)
 
             if current_node.type().category().name() == "Sop":
+                if Isparent == True:
+                    parent = current_node.parent()
+                    if current_node.input(0) is not None:
+                        previous_node = current_node.input(0) 
+                        
+                        previous_node.setTemplateFlag(False)
+                    input_number = len(current_node.inputConnectors())
 
-                parent = current_node.parent()
-                input_number = len(current_node.inputConnectors())
+                    if input_number >= 2 and current_node.input(1) is None:
+                        new_node = parent.createNode(nodeName)
+                        pos = current_node.position()
 
-                if input_number >= 2 and current_node.input(1) is None:
-                    print(input_number)
-                    new_node = parent.createNode(nodeName)
-                    pos = current_node.position()
-                    new_node.setPosition([pos[0] + 3, pos[1] + 1])
-                   
-                    current_node.setInput(1,new_node)
-                    self.toggleFlag(current_node, new_node, False)
-                    current_node.setTemplateFlag(True)
-                    return new_node
+                        new_node.setPosition([pos[0] + 3, pos[1] + 1])
+                       
+                        current_node.setInput(1,new_node)
+                        self.toggleFlag(current_node, new_node, False)
 
+                        current_node.setTemplateFlag(True)
+
+                        return new_node
+
+                    else:
+                        new_node = parent.createNode(nodeName)
+                        pos = current_node.position()
+                        new_node.setPosition([pos[0], pos[1] - 1])
+                        self.toggleFlag(new_node, current_node)
+                        current_node.setTemplateFlag(True)
+                        new_node.setInput(0,current_node)
+
+                        return new_node
                 else:
+                    parent = current_node.parent()
                     new_node = parent.createNode(nodeName)
+                    new_node.setSelected(True) 
                     pos = current_node.position()
-                    new_node.setPosition([pos[0], pos[1] - 1])
-                    self.toggleFlag(new_node, current_node)
-                    current_node.setTemplateFlag(True)
-                    new_node.setInput(0,current_node)
-                    return new_node
+                    new_node.setPosition([pos[0] + 2,pos[1]])
+                    current_node.setSelected(False)
+
             else: 
                 parent = current_node
                 new_node = parent.createNode(nodeName)
                 new_node.setSelected(True)
+
                 return new_node
 
 
