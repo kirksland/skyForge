@@ -1,10 +1,10 @@
 # ☀️ SkyForge 1.0.0-beta
 
-SkyForge est un package qui comprend deux parties principales :
+SkyForge is a comprehensive package designed to streamline both USD/Solaris pipeline management and SOP modeling workflows:
 
-1. **Pipeline USD/Solaris** : Optimisé pour le travail collaboratif, il facilite le versioning, la gestion des départements et des layers, tout en permettant des exports par lot, du multi-shot, des rendus par lot, et le clonage de rendus. SkyForge simplifie la gestion des projets complexes, que ce soit en solo ou en équipe.
+1. **USD/Solaris Pipeline**: Tailored for collaborative workflows, it simplifies versioning, department and layer management, and enables batch exports, multi-shot handling, batch rendering, and render cloning. SkyForge helps manage complex projects more efficiently, whether you're working solo or as part of a team.
 
-2. **SOP Modélisation** : Inclut des outils contextuels permettant d'éviter les arborescences trop complexes sous forme de spaghetti imbriqués. Grâce à des raccourcis clavier, des gestes à la souris et des menus radiaux dans le viewer, SkyForge permet de travailler de manière fluide et intuitive, tout en optimisant la modélisation et la retopologie.
+2. **SOP Modeling**: Features contextual tools that prevent overly complex hierarchies and tangled networks. With keyboard shortcuts, mouse gestures, and radial menus in the viewer, SkyForge enhances modeling and retopology workflows, making them more intuitive and efficient.
 
 
 Pour plus de détails, consultez notre [Wiki](https://github.com/kirksland/skyForge/wiki)
