@@ -1,6 +1,6 @@
 # ☀️ SkyForge 1.0.0-beta
 
-SkyForge est un package complet qui comprend deux parties principales :
+SkyForge est un package qui comprend deux parties principales :
 
 1. **Pipeline USD/Solaris** : Optimisé pour le travail collaboratif, il facilite le versioning, la gestion des départements et des layers, tout en permettant des exports par lot, du multi-shot, des rendus par lot, et le clonage de rendus. SkyForge simplifie la gestion des projets complexes, que ce soit en solo ou en équipe.
 
