@@ -1,4 +1,4 @@
-# ☀️ SkyForge 1.8.6-beta
+# <img src="https://github.com/user-attachments/assets/be53ddcd-9f15-48eb-8720-6bdec79d7f2a" alt="SkyForge_48" width="24" style="vertical-align: bottom;"/> SkyForge 1.8.6 - beta
 
 SkyForge is a comprehensive package designed to streamline both USD/Solaris pipeline management and SOP modeling workflows:
 
