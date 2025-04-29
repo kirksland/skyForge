@@ -9,4 +9,5 @@ SkyForge is a comprehensive package designed to streamline both USD/Solaris pipe
 Inspired by the work of the grey&old project, in a certain way from github, as well as the plugin by alexey vanzhula - modeler 2025
 
 I am not a developer, I just build the tools I need.
+
 For more details, please refer to our  [Wiki](https://github.com/kirksland/skyForge/wiki)
