@@ -6,5 +6,7 @@ SkyForge is a comprehensive package designed to streamline both USD/Solaris pipe
 
 2. **SOP Modeling**: Features contextual tools that prevent overly complex hierarchies and tangled networks. With keyboard shortcuts, mouse gestures, and radial menus in the viewer, SkyForge enhances modeling and retopology workflows, making them more intuitive and efficient.
 
+Inspired by the work of the grey&old project, in a certain way from github, as well as the plugin by alexey vanzhula - modeler 2025
 
+I am not a developer, I just build the tools I need.
 For more details, please refer to our  [Wiki](https://github.com/kirksland/skyForge/wiki)
