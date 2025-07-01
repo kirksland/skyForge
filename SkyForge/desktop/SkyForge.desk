@@ -4,29 +4,29 @@ playbar      -1
 shelf        -1
 menubar      -1
 statusbar    -1
-radial menu set main
+radial menu set polymodel
 root {
     split 0.0739583 H L {
         tabs 0 1 {
-            pane pane1 -a 0 -l 10 -H /obj/ -T OBJ -m treecontrol
+            pane pane1 -a 0 -l 10 -H /obj/recipe/ -T SOP -m treecontrol
         }
         split 0.5 H {
             split 0.5 V R {
                 tabs 0 1 {
-                    pane panetab1 -a 0 -l 10 -H /obj/ -T OBJ -m sceneview
+                    pane panetab1 -a 0 -l 10 -H /obj/recipe/ -T SOP -m sceneview
                 }
-                tabs 4 1 {
-                    pane panetab4 -a 0 -l 10 -H /obj/ -T OBJ -m details
-                    pane panetab3 -a 0 -l 10 -H /obj/ -T OBJ -m python
-                    pane panetab5 -a 1 -l 10 -H /obj/ -T OBJ -m pythonpanel
-                    pane panetab6 -a 0 -l 10 -H /obj/ -T OBJ -m scenegraphtree
-                    pane panetab10 -a 1 -l 10 -H /obj/ -T OBJ -m pythonpanel
+                tabs 0 1 {
+                    pane panetab4 -a 0 -l 10 -H /obj/recipe/ -T SOP -m details
+                    pane panetab3 -a 0 -l 10 -H /obj/recipe/ -T SOP -m python
+                    pane panetab5 -a 1 -l 10 -H /obj/recipe/ -T SOP -m pythonpanel
+                    pane panetab6 -a 0 -l 10 -H /obj/recipe/ -T SOP -m scenegraphtree
+                    pane panetab10 -a 1 -l 10 -H /obj/recipe/ -T SOP -m pythonpanel
                 }
             }
             split 0.521739 V {
                 split 0.5 H R {
                     tabs 0 1 {
-                        pane panetab2 -a 0 -l 1 -H /obj/ -T OBJ -m neteditor
+                        pane panetab2 -a 0 -l 1 -H /obj/recipe/ -T SOP -m neteditor
                     }
                     tabs 0 1 {
                         pane panetab8 -a 0 -l 2 -H /obj/ -T OBJ -m neteditor
@@ -34,7 +34,7 @@ root {
                 }
                 split 0.5 H R {
                     tabs 0 1 {
-                        pane panetab7 -a 0 -l 1 -H /obj/ -T OBJ -m parmeditor
+                        pane panetab7 -a 0 -l 10 -H /obj/recipe/ -T SOP -m parmeditor
                     }
                     tabs 0 1 {
                         pane panetab9 -a 0 -l 2 -H /obj/ -T OBJ -m parmeditor
